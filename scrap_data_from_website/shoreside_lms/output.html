@@ -34,7 +34,465 @@
     ga('send', 'pageview');
   </script>
 
-  <link href="/plm.net/_Import/Common/_Export/auxfiles/DynarchCalendar/additional.css" rel="stylesheet" text="text/css" /><link href="/plm.net/_Import/Common/_Export/auxfiles/DynarchCalendar/calendar-win2k-cold-2.css" rel="stylesheet" text="text/css" /></head>
+  
+  <script language="javascript" type="text/javascript" src="../JS/dropdown.js"></script>
+  <script type="text/javascript">
+    var page_sections = new Array();
+    
+    page_sections.push({ 'Id': 'maincontent_li_LastLoan', 'Data': 'LoanView', 'IsActive': true, 'PageId': 'LoanView', 'Pinned': false, 'EditSectionId': '', 'EditPopupWidth': '0', 'EditPopupHeight': '0' });
+    
+    page_sections.push({ 'Id': 'maincontent_li_LoanHistory', 'Data': 'LoanHistoryView', 'IsActive': true, 'PageId': 'LoanHistoryView', 'Pinned': false, 'EditSectionId': '', 'EditPopupWidth': '0', 'EditPopupHeight': '0' });
+    
+    page_sections.push({ 'Id': 'maincontent_li_Contact', 'Data': 'ContactInfoView', 'IsActive': true, 'PageId': 'ContactInfoView', 'Pinned': false, 'EditSectionId': 'customerinfo', 'EditPopupWidth': '1200', 'EditPopupHeight': '520' });
+    
+    page_sections.push({ 'Id': 'maincontent_li_Employment', 'Data': 'EmploymentInfoView', 'IsActive': true, 'PageId': 'EmploymentInfoView', 'Pinned': false, 'EditSectionId': 'employerinfo', 'EditPopupWidth': '1200', 'EditPopupHeight': '400' });
+    
+    page_sections.push({ 'Id': 'maincontent_li_Bank', 'Data': 'BankInfoView', 'IsActive': true, 'PageId': 'BankInfoView', 'Pinned': false, 'EditSectionId': 'bankinfo', 'EditPopupWidth': '1000', 'EditPopupHeight': '300' });
+    
+    page_sections.push({ 'Id': 'maincontent_li_PrepaidCard', 'Data': 'PrepaidCardView', 'IsActive': true, 'PageId': 'PrepaidCardView', 'Pinned': false, 'EditSectionId': '', 'EditPopupWidth': '0', 'EditPopupHeight': '0' });
+    
+    page_sections.push({ 'Id': 'maincontent_li_DebitCard', 'Data': 'DebitCardView', 'IsActive': true, 'PageId': 'DebitCardView', 'Pinned': false, 'EditSectionId': 'creditdebitcards', 'EditPopupWidth': '1100', 'EditPopupHeight': '350' });
+    
+    page_sections.push({ 'Id': 'maincontent_li_References', 'Data': 'ReferencesView', 'IsActive': true, 'PageId': 'ReferencesView', 'Pinned': false, 'EditSectionId': 'referencesinfo', 'EditPopupWidth': '1100', 'EditPopupHeight': '200' });
+    
+    page_sections.push({ 'Id': 'maincontent_li_Landlord', 'Data': 'LandlordView', 'IsActive': true, 'PageId': 'LandlordView', 'Pinned': false, 'EditSectionId': 'landlordinfo', 'EditPopupWidth': '800', 'EditPopupHeight': '300' });
+    
+    page_sections.push({ 'Id': 'maincontent_li_CustomersSite', 'Data': 'CustomerSiteView', 'IsActive': true, 'PageId': 'CustomerSiteView', 'Pinned': false, 'EditSectionId': 'logininfo', 'EditPopupWidth': '1000', 'EditPopupHeight': '200' });
+    
+    page_sections.push({ 'Id': 'maincontent_li_CustomerFiles', 'Data': 'CustomerFilesView', 'IsActive': true, 'PageId': 'CustomerFilesView', 'Pinned': false, 'EditSectionId': '', 'EditPopupWidth': '0', 'EditPopupHeight': '0' });
+    
+    page_sections.push({ 'Id': 'maincontent_li_CustomerDetailHistory', 'Data': 'CustomerDetailsHistoryView', 'IsActive': true, 'PageId': 'CustomerDetailsHistoryView', 'Pinned': false, 'EditSectionId': '', 'EditPopupWidth': '0', 'EditPopupHeight': '0' });
+    
+    page_sections.push({ 'Id': 'mainpropertiesview', 'Data': 'MainPropertiesView', 'IsActive': true, 'PageId': 'MainPropertiesView', 'IsPageSection': true, 'EditSectionId': '', 'EditPopupWidth': '0', 'EditPopupHeight': '0' });
+    
+
+    var sectionsModel = function(sections)
+    {
+      this.sections = sections;
+      currentSectionId = 'maincontent_li_LastLoan';
+      this.clearNotVisibleSections = false;
+      this.leftNavCurrentSection = currentSectionId;
+
+      this.getSection = function(propertyValue, propertyName, getCollection)
+      {
+        if (propertyName == null)
+        {
+          propertyName = "Id";
+        }
+        var filteredSections = getCollection ? new Array() : null;
+
+        for (var i = 0; i < this.sections.length; i++)
+        {
+          if (this.sections[i][propertyName] == propertyValue)
+          {
+            if (!getCollection)
+            {
+              return this.sections[i];
+            }
+            else
+            {
+              filteredSections.push(this.sections[i]);
+            }
+          }
+        }
+
+        if (!getCollection)
+        {
+          return null;
+        }
+        else
+        {
+          return filteredSections;
+        }
+      }
+
+      this._clearNotVisibleSections = function()
+      {
+      }
+
+      this._clearNotVisibleSections = function()
+      {
+        if (this.clearNotVisibleSections)
+        {
+          return;
+        }
+
+        this.clearNotVisibleSections = true;
+        for (var i=0; i<this.sections.length; i++)
+        {
+          var isVisibleSection = this.sections[i].Pinned || this.sections[i].IsPageSection || this.leftNavCurrentSection == this.sections[i].Id;
+          if (!isVisibleSection)
+          {
+            $('#section_' + this.sections[i].Id).empty();
+          }
+        }
+      }
+
+      this._refreshSectionContent = function(pageid, ajaxResponse, hasScrollTo)
+      {
+        var section = this.getSection(pageid, 'PageId');
+        this._clearNotVisibleSections();
+        section.cachedAjaxResponse = ajaxResponse;
+        if (!section.IsPageSection)
+        {
+          $('#section_' + section.Id).html(ajaxResponse.Html);
+          $('#section_' + section.Id + ' .ProfileHeaderSection').show();
+          if (hasScrollTo)
+          {
+            scrollTo('#section_' + section.Id + ':eq(0)');
+          }
+        }
+        else
+        {
+          $('#' + section.Id).html(ajaxResponse.Html);
+        }
+      }
+
+      this._invalidateAjaxCache = function()
+      {
+        for (var i = 0; i < this.sections.length; i++)
+        {
+          this.sections[i].cachedAjaxResponse = null;
+        }
+      }
+
+      this.showEditSectionWindow = function(pageId)
+      {
+        var section = this.getSection(pageId, 'PageId');
+        newWindow("CreateCustomer.aspx" + "?editcustomerid=11065&editsection=" + section.EditSectionId, section.EditPopupWidth, section.EditPopupHeight);
+      }
+
+      this.togglePinnedSection = function(tabid, $li, iconEvent)
+      {
+        $li.toggleClass('pinned');
+
+        var section = this.getSection(tabid);
+        var isPinned = section.Pinned;
+        section.Pinned = !isPinned;
+        syncPinState(section.Pinned);
+
+        if (!section.Pinned)
+        {
+          if (iconEvent)//outer li also catches click events
+          {
+            iconEvent.preventDefault();
+            iconEvent.stopPropagation();
+          }
+
+          if (tabid == this.leftNavCurrentSection)//move active status to next pinned section
+          {
+            var nextActiveSection = section;
+            var pinnedSections = this.getSection(true, 'Pinned', true);
+            for(var i = 0; i < pinnedSections.length; i++)
+            {
+              if (pinnedSections[i].Id != tabid)
+              {
+                nextActiveSection = pinnedSections[i];
+                i = pinnedSections.length;
+              }
+            }
+
+            if (nextActiveSection.Id != section.Id)
+            {
+              if ($li.hasClass('NavigationSelected'))
+              {
+                $li.removeClass('NavigationSelected');
+              }
+              this.leftNavCurrentSection = nextActiveSection.Id;
+              $('#' + nextActiveSection.Id).addClass('NavigationSelected');
+              $('#section_' + section.Id).empty();
+            }
+            else//just one pinned section dont lost their active status
+            {
+            }
+          }
+          else
+          {
+            $('#section_' + section.Id).empty();
+          }
+        }
+        else//section will be pinned and active - outer li.click handles that case
+        {
+        }
+      }
+
+      //show nav active section or nav pinned section or page section and their dependent sections, refreshAll - force redraw/refresh all visible sections
+      this.refreshSection = function(tabid, invalidateCache, refreshAll, onDone, onFail)
+      {
+        var that = this;
+        this.clearNotVisibleSections = false;
+        var refreshedSections = new Array();
+
+        if (invalidateCache)
+        {
+          //invalidate cache of section with all of their dependencies(all navigation sections and top page section - possible dependencies)
+          this._invalidateAjaxCache();
+        }
+
+        if (!invalidateCache && !refreshAll)
+        {
+          var section = (tabid != null) ? this.getSection(tabid) : this.getSection(this.leftNavCurrentSection);
+          if (section != null)
+          {
+            refreshedSections.push(section);
+          }
+        }
+        else
+        {
+          var pinnedSections = this.getSection(true, 'Pinned', true);
+          var pageSections = this.getSection(true, 'IsPageSection', true);
+          var activeSection = this.getSection(this.leftNavCurrentSection);
+          if (!activeSection.Pinned)
+          {
+            refreshedSections.push(activeSection);
+          }
+          $.each(pinnedSections, function() { refreshedSections.push(this); });
+          $.each(pageSections, function() { refreshedSections.push(this); });
+        }
+
+        if (refreshedSections.length > 0)
+        {
+          var uncachedSectionsData = new Array();
+          var scrollToSection = refreshedSections.length == 1;
+          var scrollToTop = refreshAll == true && !scrollToSection;
+          $.each(refreshedSections, function() { if (this.cachedAjaxResponse == null) uncachedSectionsData.push(this.Data); });
+          if (uncachedSectionsData.length > 0)
+          {
+            postAjaxRequest(null, { pageids: uncachedSectionsData }, { url: window.location.pathname + '/GetPageAjaxContent?customerid=11065' })
+              .done(function (result) {
+                $.each(result, function() { that.getSection(this.PageId, 'PageId').cachedAjaxResponse = this; });
+                $.each(refreshedSections, function() { that._refreshSectionContent(this.PageId, this.cachedAjaxResponse, scrollToSection); });
+                if (onDone != null)
+                {
+                  onDone();
+                }
+                if (scrollToTop)
+                {
+                  scrollTo(0, { 'duration': 0 });//reset scroll position
+                }
+              })
+              .fail(function (result) {
+                if (onFail != null)
+                {
+                  onFail();
+                }
+              });
+          }
+          else
+          {
+            $.each(refreshedSections, function() { that._refreshSectionContent(this.PageId, this.cachedAjaxResponse, scrollToSection); });
+            if (onDone != null)
+            {
+              onDone();
+            }
+            if (scrollToTop)
+            {
+              scrollTo(0, { 'duration': 0 });
+            }
+          }
+        }
+      }
+    }
+
+    var currentSectionId = '';
+    var skipSectionRefresh = false;
+    var pageSections = new sectionsModel(page_sections);
+
+    //tracking popups from navigation sections and page section
+    $('body a,input[type="button"]').live({
+      click: function (e) {
+        skipSectionRefresh = false;
+        var $section = getParentByClass($(e.target), function($parentEl) { return $parentEl.hasClass('ProfileHeaderSection') || $parentEl.hasClass('pagesection'); });
+        if ($section != null)
+        {
+          if ($section.hasClass('ProfileHeaderSection'))
+          {
+            var sectionModel = pageSections.getSection($section.data('pageid'), 'PageId');
+            if (sectionModel != null)
+            {
+              currentSectionId = sectionModel.Id;
+            }
+          }
+        }
+        else//other links('Notes', 'WatchStatus') dont affects page content
+        {
+          skipSectionRefresh = true;
+        }
+
+        return true;
+      }
+    });
+
+    function refreshSection(sectionId)
+    {
+      if (sectionId == null && skipSectionRefresh)
+      {
+        return;
+      }
+
+      if (sectionId == null)
+      {
+        sectionId = currentSectionId;//get section from tracking current section or get explicit section value(for non tracked sections)
+      }
+      if (pageSections.getSection(sectionId) != null)
+      {
+        pageSections.refreshSection(sectionId, true, false);
+      }
+    }
+
+    function navigationclick(li)
+    {
+      var id = $(li).attr("id");
+      var previousNavActiveSection = pageSections.leftNavCurrentSection;
+      pageSections.leftNavCurrentSection = id;
+
+      var onDone = function()
+      {
+        $(".SideNavigation li").removeClass("NavigationSelected");
+        $("#" + id).addClass("NavigationSelected");
+      }
+      var onFail = function()
+      {
+        var section = pageSections.getSection(id);
+        if (section.Pinned)
+        {
+          pageSections.togglePinnedSection(id, $(li), null);
+        }
+
+        pageSections.leftNavCurrentSection = previousNavActiveSection;
+      }
+
+      pageSections.refreshSection(id, false, false, onDone, onFail);
+    }
+
+    function togglepin()
+    {
+      var $pinAllBtn = $(".SideNavigation li[data-iscommandbutton=true]:eq(0)");
+      var isPinAll = !$pinAllBtn.hasClass('pinned');
+
+      if (isPinAll)
+      {
+        var newPinnedSections = new Array();
+        var refreshLeftNav = false;
+        $.each($(".SideNavigation li"), function() {
+          var $li = $(this);
+          if (!$li.data('iscommandbutton') && !$li.hasClass('pinned'))
+          {
+            var pinnedSection = pageSections.getSection($li.attr("id"));
+            pinnedSection.Pinned = true;
+            refreshLeftNav = true;
+            newPinnedSections.push(pinnedSection);
+          }
+        });
+
+        if (refreshLeftNav)
+        {
+          var onDone = function()
+          {
+            $pinAllBtn.toggleClass('pinned');
+            $.each(newPinnedSections, function() { if (!$('#' + this.Id).hasClass('pinned')) $('#' + this.Id).addClass('pinned') });
+          }
+          var onFail = function() { $.each(newPinnedSections, function() { this.Pinned = false; }); }//rollback section model changes
+          pageSections.refreshSection(null, false, true, onDone, onFail);
+        }
+      }
+      else
+      {
+        $.each($(".SideNavigation li"), function() {
+          var $li = $(this);
+          if ($li.hasClass('pinned'))
+          {
+            $li.removeClass('pinned');
+          }
+        });
+        $.each(pageSections.sections, function() { if (!this.IsPageSection) this.Pinned = false; });
+        pageSections.clearNotVisibleSections = false;
+        pageSections._clearNotVisibleSections();
+      }
+    }
+
+    function syncPinState(isPinned)
+    {
+      var $pinAllBtn = $(".SideNavigation li[data-iscommandbutton=true]:eq(0)");
+      if (!isPinned && $pinAllBtn.hasClass('pinned'))
+      {
+        $pinAllBtn.removeClass('pinned')
+      }
+      else if (isPinned)
+      {
+        var hasUnpinned = false;
+        $.each(pageSections.sections, function() { if (!this.IsPageSection && !this.Pinned) hasUnpinned = true; });
+        if (hasUnpinned && $pinAllBtn.hasClass('pinned'))
+        {
+          $pinAllBtn.removeClass('pinned')
+        }
+        else if (!hasUnpinned && !$pinAllBtn.hasClass('pinned'))
+        {
+          $pinAllBtn.addClass('pinned')
+        }
+      }
+    }
+
+    function showEditSectionWindow(editSectionLink)
+    {
+      var $section = getParentByClass($(editSectionLink), function($parentEl) { return $parentEl.hasClass('ProfileHeaderSection')/*|| $parentEl.hasClass('pagesection');*/ });
+      pageSections.showEditSectionWindow($section.data('pageid'));
+    }
+
+    /*modified scrollTo plugin*/
+    function scrollTo(target, options, callback)
+    {
+      var belowthefold = function($element, settings) {
+          var fold = $(window).height() + $(window).scrollTop();
+          var threshold = settings.headermarginbottom == null ? settings.threshold : Math.min(settings.threshold, -settings.headermarginbottom);
+          return fold <= $element.offset().top - threshold;
+        };
+      var abovethetop = function($element, settings) {
+        var top = $(window).scrollTop();
+        return top >= $element.offset().top + $element.height() - settings.threshold;
+      };
+      var inviewport = function($element, settings) {
+        if (settings == null)
+        {
+          settings = { threshold : 0, headermarginbottom: 30 };//headermarginbottom = min offset from section header to viewport bottom, it force scrolling when section header only partially visible: section.offset().top - ($(window).height() + $(window).scrollTop()) >= headermarginbottom)
+        }
+        return !belowthefold($element, settings) && !abovethetop($element, settings);
+      };
+
+      if(typeof options == 'function' && arguments.length == 2) { callback = options; options = target; }
+      var settings = $.extend({
+        scrollTarget  : target,
+        offsetTop     : 50,
+        duration      : 500,
+        easing        : 'swing'
+      }, options);
+
+      var $firstVisibleSection = $('#sectionsholder .section:visible:eq(0)');
+      if ($firstVisibleSection.length == 1 && typeof settings.scrollTarget == "number" && settings.scrollTarget == 0 &&
+          inviewport($firstVisibleSection))//if first visible section in viewport then scrolling to page top is not necessary
+      {
+        return;
+      }
+      else if (typeof settings.scrollTarget != "number" && inviewport($(settings.scrollTarget)))
+      {
+        return;
+      }
+
+      return $('html,body').each(function(){
+        var scrollPane = $(this);
+        var scrollTarget = (typeof settings.scrollTarget == "number") ? settings.scrollTarget : $(settings.scrollTarget);
+        var scrollY = (typeof scrollTarget == "number") ? scrollTarget : scrollTarget.offset().top - parseInt(settings.offsetTop);
+        scrollPane.animate({scrollTop : scrollY }, parseInt(settings.duration), settings.easing, function(){
+          if (typeof callback == 'function') { callback.call(this); }
+        });
+      });
+    }
+
+    $(document).ready(function() {
+      scrollTo(0, { 'duration': 0 });//return scroll to page top after each page load
+    })
+  </script>
+</head>
 
 <body>
   
@@ -109,7 +567,7 @@ var blinknotifications = "true";
 </script>
 
 <script type='text/javascript'>
-var signalrbaseurl = "https://signalr1.infinityels.com/signalr";
+var signalrbaseurl = "https://signalr9.infinityels.com/signalr";
 </script>
 
 
@@ -1702,616 +2160,561 @@ var signalrbaseurl = "https://signalr1.infinityels.com/signalr";
         <td class="PageTableMM">
     
         
-<script language="javascript" type="text/javascript" src="../_Import/Common/_Export/JS/Printing.js"></script>
+  <div id="log" style="height:200px;width:90%; overflow:scroll; display:none;"></div>
+  <form method="post" action="./CustomerDetails.aspx?customerid=11065" id="ctl00">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKMTM0MjQyMjAzMWQYEAUuY3RsMDAkTm90aWZpY2F0aW9uc0NvbnRyb2wkQ29sbGVjdGlvbnNDb3VudFZhcg8FATBkBThjdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRDb21tdW5pY2F0aW9uTWVzc2FnZXNDb3VudFZhcg8FATBkBSxjdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRGb2xsb3dVcHNDb3VudFZhcg8FATBkBSljdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRTaWduYWxSQmFzZVVybA8FKGh0dHBzOi8vc2lnbmFscjkuaW5maW5pdHllbHMuY29tL3NpZ25hbHJkBTFjdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRUaWNrZXRzQnV0dG9uQWN0aXZlVmFyDwUFZmFsc2VkBTNjdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRGb2xsb3dVcHNCdXR0b25BY3RpdmVWYXIPBQVmYWxzZWQFLWN0bDAwJE5vdGlmaWNhdGlvbnNDb250cm9sJFByb2Nlc3NpbmdDb3VudFZhcg8FATBkBSpjdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRUaWNrZXRzQ291bnRWYXIPBQMxMjJkBTNjdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRSZXZpZXdpbmdCdXR0b25BY3RpdmVWYXIPBQVmYWxzZWQFLGN0bDAwJE5vdGlmaWNhdGlvbnNDb250cm9sJFJldmlld2luZ0NvdW50VmFyDwUBMGQFNGN0bDAwJE5vdGlmaWNhdGlvbnNDb250cm9sJFByb2Nlc3NpbmdCdXR0b25BY3RpdmVWYXIPBQVmYWxzZWQFKWN0bDAwJE5vdGlmaWNhdGlvbnNDb250cm9sJEFsZXJ0c0NvdW50VmFyDwUBMGQFMGN0bDAwJE5vdGlmaWNhdGlvbnNDb250cm9sJEJsaW5rTm90aWZpY2F0aW9uc1Zhcg8FBHRydWVkBTBjdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRBbGVydHNCdXR0b25BY3RpdmVWYXIPBQVmYWxzZWQFP2N0bDAwJE5vdGlmaWNhdGlvbnNDb250cm9sJENvbW11bmljYXRpb25NZXNzYWdlc0J1dHRvbkFjdGl2ZVZhcg8FBWZhbHNlZAU1Y3RsMDAkTm90aWZpY2F0aW9uc0NvbnRyb2wkQ29sbGVjdGlvbnNCdXR0b25BY3RpdmVWYXIPBQVmYWxzZWTDCmLZjTcCzuwT+WEqpaVdUku6K5+JTpPrp8Xwx774Ew==" />
+
+<script language="javascript" src="/plm.net/JS/skmMenu.js"></script>
+<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="CD7DE1D4" />
+<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdAAQuiwfPSx65jfXzGphvfMsqS7gCt/KsyZS+K4VAEnjlTyGEyx8SWIA8de5L/q/6RhRF/0QoxKWJex9ZCZw4xxgVxo8CjBKojlXT2X8Fo15sQfrQWWUksSNzA4KX+5cx2FE=" />
+    <input type="hidden" name="ctl00$maincontent$PageTabState" id="maincontent_PageTabState" />
+    <style type="text/css">
+      .PlmAdmin table.DataTable td { padding:4px; }
+    </style>
+    <script type="text/javascript">
+      /*Main properties notes*/
+      function editcreditlimit()
+      {
+        newWindow("EditCreditLimit.aspx?customerid=11065&section=mainpropertiesview", 400, 200);
+      }
+
+      function editstore()
+      {
+        newWindow("popups/EditCustomerStore.aspx?customerid=11065&section=mainpropertiesview", 400, 200);
+      }
+
+      function editprivacy()
+      {
+        newWindow("popups/EditCustomerPrivacy.aspx?customerid=11065&section=mainpropertiesview", 400, 200);
+      }
+
+      function editcustomfield(fieldnumber)
+      {
+        newWindow("popups/EditCustomerCustomField.aspx?customerid=11065&fieldnumber=" + fieldnumber + "&section=mainpropertiesview", 400, 200);
+      }
+
+      function followups()
+      {
+        window.open('CustomerFollowUps.aspx?customerid=11065&section=mainpropertiesview', '',  'location=no,directories=no,menubar=no,status=no,scrollbars=yes,toolbar=no,titlebar=no,z-lock=no,resizable=yes,alwaysRaised=yes,dependent=yes,width=600,height=300');
+      }
+
+      function comments()
+      {
+        window.open('CustomerComments.aspx?customerid=11065&section=mainpropertiesview', '',  'location=no,directories=no,menubar=no,status=no,scrollbars=yes,toolbar=no,titlebar=no,z-lock=no,resizable=yes,alwaysRaised=yes,dependent=yes,width=600,height=300');
+      }
+      /*End Main properties notes*/
+
+      /*functions for spouse,coborrower,coborrower spouse views*/
+      function showRelatedPersonInfo(showElementId, hideElementId, contentsElementId)
+      {
+          $('#' + showElementId).hide();
+          $('#' + hideElementId).show();
+          $('#' + contentsElementId).show();
+      }
+
+      function hideRelatedPersonInfo(showElementId, hideElementId, contentsElementId)
+      {
+          $('#' + showElementId).show();
+          $('#' + hideElementId).hide();
+          $('#' + contentsElementId).hide();
+      }
+
+      function switchRelatedPersonInfo(showElementId, hideElementId, contentsElementId)
+      {
+          if (!$('#' + contentsElementId).is(':visible'))
+              showRelatedPersonInfo(showElementId, hideElementId, contentsElementId);
+         else
+              hideRelatedPersonInfo(showElementId, hideElementId, contentsElementId);
+      }
+      /*end functions for spouse,coborrower,coborrower spouse views*/
+
+      /*Header*/
+      var customerWatchStatus = true;
+
+      function openCustomerNotes()
+      {
+        window.open('CustomerNotes.aspx?customerid=11065&isnosection=true', '',  'location=no,directories=no,menubar=no,status=no,scrollbars=yes,toolbar=no,titlebar=no,z-lock=no,resizable=yes,alwaysRaised=yes,dependent=yes,width=800,height=400');
+      }
+
+      function openLoanNotes(loanid)
+      {
+        window.open('CustomerNotes.aspx?loanid=' + loanid + '&isnosection=true', '',  'location=no,directories=no,menubar=no,status=no,scrollbars=yes,toolbar=no,titlebar=no,z-lock=no,resizable=yes,alwaysRaised=yes,dependent=yes,width=800,height=400');
+      }
+
+      function updateWatchStatus(watch)
+      {
+        if (!confirm('Are you sure you want to switch customer watch status?')) return;
+
+        postAjaxRequest('UpdateWatchStatus', { customerid: 11065, watch: watch })
+          .done(function() {
+            customerWatchStatus = watch;
+            $('#maincontent_WatchLink').toggle(!watch);
+            $('#maincontent_UnwatchLink').toggle(watch);
+            $('#maincontent_Name').css('color', watch ? 'red' : 'black');
+          });
+      }
+
+      function sendUpperLakeLead()
+      {
+        newWindow("popups/UpperLakeLead.aspx?customerid=11065", 800, 600);
+      }
+
+      function deleteCustomer()
+      {
+        if (!confirm('Are you sure you want to delete customer?')) return;
+
+        postAjaxRequest('DeleteCustomer', { customerid: 11065 });
+      }
+      /*End Header*/
+    </script>
+
+    <table cellpadding="0" cellspacing="0">
+    <tr>
+      <td valign="top" class="PageNavigation">
+        <ul class="SideNavigation">
+          <li id="maincontent_li_PinAll" data-iscommandbutton="true" style="margin-bottom: 20px;" onclick="javascript:togglepin()"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Pin All</a></li>
+          
+          <li id="maincontent_li_LastLoan" class="NavigationSelected" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Loans</a><span class='DashboardCount'>1</span></li>
+          <li id="maincontent_li_LoanHistory" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Loan History</a><span class='DashboardCount'>1</span></li>
+          
+          
+          
+          <li id="maincontent_li_Contact" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Contact Information</a></li>
+          <li id="maincontent_li_Employment" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Employment Information</a><span class='DashboardCount'>1</span></li>
+          <li id="maincontent_li_Bank" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Bank Information</a><span class='DashboardCount'>1</span></li>
+          <li id="maincontent_li_PrepaidCard" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Prepaid Card</a><span class='DashboardCount'>0</span></li>
+          <li id="maincontent_li_DebitCard" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Debit/Credit Card</a><span class='DashboardCount'>1</span></li>
+          
+          
+          
+          <li id="maincontent_li_References" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>References</a><span class='DashboardCount'>2</span></li>
+          <li id="maincontent_li_Landlord" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Landlord</a></li>
+          <li id="maincontent_li_CustomersSite" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Customers Site</a></li>
+          
+          <li id="maincontent_li_CustomerFiles" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Customer Files</a><span class='DashboardCount'>8</span></li>
+          <li id="maincontent_li_CustomerDetailHistory" onclick="javascript:navigationclick(this)"><img src="../images/pin.png" width="16px" height="16px" class="pin" /><a>Customer Detail History</a><span class='DashboardCount'>8</span></li>
+        </ul>
+      </td>
+      <td valign="top" class="PageGradeRight">
+        <span style="color: red;"></span>
+        <span style="color: green;"></span>
+
+        
+        <table cellspacing="0" cellpadding="0" class="ProfileHeader">
+          <tr>
+            <td nowrap="nowrap"><span id="maincontent_Span_Name" class="Header" style="color:red;">Luis Salcedo</span></td>
+            <td align="right" style="float: right;">
+              <span>
+              <a id="maincontent_HistoryLink" class="WordOnButton" href="CustomerHistory.aspx?loanid=9605">History</a>
+              <a id="maincontent_NotesLink" class="WordOnButton" href="javascript:openCustomerNotes();">Notes</a>
+              <a id="maincontent_WatchLink" class="WordOnButton" href="javascript:updateWatchStatus(true);" style="display:none;">Watch</a>
+              <a id="maincontent_UnwatchLink" class="WordOnButtonOn" href="javascript:updateWatchStatus(false);" style="display:;">Unwatch</a>
+              <a id="maincontent_PdfLink" class="WordOnButton" href="CustomerDetailsPdf.aspx?customerid=11065">PDF</a>
+              
+              </span>
+            </td>
+            <td align="right" width="55px" style="float: clear;">
+              <a id="maincontent_EditCustomerLink" class="EditReportButton" title="Edit Customer" href="CreateCustomer.aspx?editcustomerid=11065"></a>
+              <a id="maincontent_DeleteCustomerLink" class="aspNetDisabled DeleteButtonDisabled" title="Delete Customer"></a>
+            </td>
+          </tr>
+        </table>
+        
+
+        <div id="mainpropertiesview" class="pagesection" data-pageid="MainPropertiesView">
+        </div>
+
+        
+        <div style="margin-bottom:40px; background-color:#2a2d36;">
+          
 
 <script type="text/javascript">
-  function hideNoPrintItems(pdf)
+  function openTeletrackReport(teletrackselect, coborrower)
   {
-    if (pdf)
+    var selectedvalue = teletrackselect.val();
+    if (selectedvalue == '')
     {
-      $('table.PageTable').css('width', '100%');
-      $('table.PageTable').removeClass('PageTable');
-    }
-    $('.HideWhenPrinting').hide();
-    $('.ShowWhenPrinting').show();
-    hideMasterPageItems();
-  }
-
-  $(document).ready(function ()
-  {
-    $("#hideFilters").click(function ()
-    {
-      $("#filtersDiv").slideToggle("fast");
-      $("#viewSearchPanel").toggleClass("viewSearchButtonOn");
-    });
-
-    Printing_setup(hideNoPrintItems, $('#form1').attr('action'));
-  });
-
-  function applyLetterSelectionControlsVisibility()
-  {
-    var letterAction = $('#maincontent_LetterAction').val();
-    $('#maincontent_Letter_ForEmail').toggle(letterAction == 'send');
-    $('#maincontent_Letter_ForDocument').toggle(letterAction == 'word' || letterAction == 'pdf');
-    $('#maincontent_Letter_ForTextMessage').toggle(letterAction == 'textmessage');
-
-    var datafilter = '';
-    if (letterAction == 'send') datafilter = 'data-acceptsemail';
-    if (letterAction == 'word' || letterAction == 'pdf') datafilter = 'data-acceptsmail';
-    if (letterAction == 'textmessage') datafilter = 'data-acceptstextmessages';
-
-    $('input[name="letterCustomerIds"][' + datafilter + '="true"]').show();
-    $('input[name="letterCustomerIds"][' + datafilter + '="false"]').hide().prop('checked', false);
-  }
-
-  function checkLetterValues()
-  {
-    var letterAction = $('#maincontent_LetterAction').val();
-    var letterSelectionControl = null;
-    if (letterAction == 'send') letterSelectionControl = $('#maincontent_Letter_ForEmail');
-    if (letterAction == 'word' || letterAction == 'pdf') letterSelectionControl = $('#maincontent_Letter_ForDocument');
-    if (letterAction == 'textmessage') letterSelectionControl = $('#maincontent_Letter_ForTextMessage');
-
-    var errMsg = "";
-    if ((!letterSelectionControl) || (!$(letterSelectionControl).val()))
-    {
-      errMsg += "No letter selected\n";
+      showAlert('Please select report');
+      return;
     }
 
-    //==//
+    var parameters = '';
+    if (checkNonNegativeIntegerFormat(selectedvalue))
     {
-      var hasRecipients = false;
-      $("input[name='letterCustomerIds']").each(function() {
-        if($(this).is(':checked'))
-        {
-          hasRecipients = true;
-          return false;
-        }
-      });
-
-      if(!hasRecipients)
-        errMsg += "No letter recipients selected";
-    }
-
-    if(0 != errMsg.length)
-    {
-      showAlert("Please correct the following errors:\n------\n" + errMsg);
-      return false;
+      parameters = '&savedexternalreportid=' + selectedvalue;
     }
     else
     {
-      sendLetter();
-      return false;
+      parameters = '&customerid=11065' + (coborrower ? '&coborrower=1' : '');
     }
+
+    window.open('/plm.net/customers/reports/TeletrackReport.aspx?mode=text' + parameters, '_blank');
   }
 
-  function allLettersChecked(checkbox)
+  function openVeritecReport()
   {
-    var checked = $(checkbox).is(':checked');
-    $('[name="letterCustomerIds"]:visible').prop('checked', checked);
+    window.open('/plm.net/customers/reports/VeritecReport.aspx?customerid=11065', '_blank');
   }
 
-  function sendLetter()
+  function openInternalClassificationReport(classificationselect)
   {
-    var letterCustomerIds = new Array();
-    $.each($('input[type=checkbox][name=letterCustomerIds]:checked'), function () { letterCustomerIds.push($(this).val()) });
-    postAjaxRequest('DoLetterAction', { customerids: letterCustomerIds.join(','), letteraction: $('#maincontent_LetterAction').val(), letterid: $('select[data-isletterid=true]:visible').val() })
-      .done(function (result) {
-        if (result.FileId)
-        {
-          var $form = $('<form action="/plm.net/customers/GetSessionFile.ashx" style="display:none;"></form>');
-          $form.append('<input type="hidden" name="fileid" value="' + result.FileId + '" />');
-          $('body').append($form);
-          $form.submit();
-        }
-        else
-        {
-          showAlert(result.Message, null, false);
-        }
-      });
-  }
-
-  function sort(columnid)
-  {
-    if ($('#maincontent_SortColumnId').val() == columnid)
+    var selectedvalue = classificationselect.val();
+    if (selectedvalue == '')
     {
-      $('#maincontent_SortDirection').val( $('#maincontent_SortDirection').val() == '0' ? '1' : '0' );
+      showAlert('Please select report');
+      return;
+    }
+
+    var parameters = '';
+    if (/^l(\d+)$/.test(selectedvalue))
+    {
+      parameters = 'loanid=' + RegExp.$1;
+    }
+    else if (/^r(\d+)$/.test(selectedvalue))
+    {
+      parameters = 'customerid=11065&rulesetid=' + RegExp.$1;
+    }
+
+    window.open('/plm.net/customers/reports/InternalClassificationReport.aspx?' + parameters, '_blank');
+  }
+
+  function openClVerifyReport(clverifyselect, mode, coborrower)
+  {
+    var selectedvalue = clverifyselect.val();
+    if (selectedvalue == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+
+    var parameters = '';
+    if (checkNonNegativeIntegerFormat(selectedvalue))
+    {
+      parameters = '&savedexternalreportid=' + selectedvalue;
     }
     else
     {
-      $('#maincontent_SortColumnId').val(columnid);
-      $('#maincontent_SortDirection').val('0');
+      parameters = '&customerid=11065&reporttype=' + selectedvalue + (coborrower ? '&coborrower=1' : '');
     }
 
-    __doPostBack('__Page', '');
+    window.open('/plm.net/customers/reports/ClVerifyReport.aspx?mode=' + mode + parameters, '_blank');
   }
 
-  function checkStoreValue()
+  function openDataXReport(dataxselect, mode, coborrower)
   {
-    var hasCustomers = false;
-    $('[name="storeCustomerIds"]').each(function () {
-      if ($(this).is(':checked'))
+    var selectedvalue = dataxselect.val();
+    if (selectedvalue == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+
+    var parameters = '';
+    if (checkNonNegativeIntegerFormat(selectedvalue))
+    {
+      parameters = '&savedexternalreportid=' + selectedvalue;
+    }
+    else
+    {
+      parameters = '&customerid=11065' + (coborrower ? '&coborrower=1' : '');
+    }
+
+    window.open('/plm.net/customers/reports/DataXReport.aspx?mode=' + mode + parameters, '_blank');
+  }
+
+  function openFactorTrustReport(factortrustselect, mode)
+  {
+    var selectedvalue = factortrustselect.val();
+    if (selectedvalue == null)
+    {
+      showAlert('FactorTrust cannot be run after loan was approved');
+      return;
+    }
+    if (selectedvalue == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+
+    var parameters = '';
+    if (checkNonNegativeIntegerFormat(selectedvalue))
+    {
+      parameters = '&savedexternalreportid=' + selectedvalue;
+    }
+    else
+    {
+      parameters = '&customerid=11065';
+    }
+
+    window.open('/plm.net/customers/reports/FactorTrustReport.aspx?mode=' + mode + parameters, '_blank');
+  }
+
+  function openTransUnionReport(transunionselect, coborrower)
+  {
+    var selectedvalue = transunionselect.val();
+    if (selectedvalue == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+
+    var parameters = '';
+    if (checkNonNegativeIntegerFormat(selectedvalue))
+    {
+      parameters = '&savedexternalreportid=' + selectedvalue;
+    }
+    else
+    {
+      parameters = '&customerid=11065' + (coborrower ? '&coborrower=1' : '');
+    }
+    window.open('/plm.net/customers/reports/TransUnionReport.aspx?mode=text' + parameters, '_blank');
+  }
+
+  function openAccurintReport(accurintselect, mode, coborrower)
+  {
+    var selectedvalue = accurintselect.val();
+    if (selectedvalue == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+
+    var parameters = '';
+    if (checkNonNegativeIntegerFormat(selectedvalue))
+    {
+      parameters = '&savedexternalreportid=' + selectedvalue;
+    }
+    else
+    {
+      parameters = '&customerid=11065&reporttype=' + selectedvalue + (coborrower ? '&coborrower=1' : '');
+    }
+
+    window.open('/plm.net/customers/reports/AccurintReport.aspx?mode=' + mode + parameters, '_blank');
+  }
+
+  function openClarityReport(clarityselect, mode, coborrower)
+  {
+    var selectedvalue = clarityselect.val();
+
+    var parameters = '';
+    if (/^saved:(\d+)$/.test(selectedvalue))
+    {
+      parameters = '&savedexternalreportid=' + RegExp.$1;
+    }
+    else if (/^account:(\d+)$/.test(selectedvalue))
+    {
+      parameters = '&customerid=11065&clarityaccountid=' + RegExp.$1 + (coborrower ? '&coborrower=1' : '');
+    }
+    else
+    {
+      showAlert('Please select report');
+      return;
+    }
+
+    window.open('/plm.net/customers/reports/ClarityReport.aspx?mode=' + mode + parameters, '_blank');
+  }
+
+  function openMicroBiltReport(microbiltselect, mode)
+  {
+    var selectedvalue = microbiltselect.val();
+
+    if (selectedvalue == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+
+    var parameters = '';
+    if (checkNonNegativeIntegerFormat(selectedvalue))
+    {
+      parameters = '&savedexternalreportid=' + selectedvalue;
+    }
+    else
+    {
+      parameters = '&customerid=11065&reporttype=' + selectedvalue;
+    }
+    window.open('/plm.net/customers/reports/MicroBiltReport.aspx?mode=' + mode + parameters, '_blank');
+  }
+
+  function openGdsLinkReport(gdslinkselect, mode)
+  {
+    var selectedvalue = gdslinkselect.val();
+    if (selectedvalue == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+
+    var parameters = '';
+    if (checkNonNegativeIntegerFormat(selectedvalue))
+    {
+      parameters = '&savedexternalreportid=' + selectedvalue;
+    }
+    else
+    {
+      parameters = '&customerid=11065&reporttype=' + selectedvalue;
+    }
+
+    window.open('/plm.net/customers/reports/GdsLinkReport.aspx?mode=' + mode + parameters, '_blank');
+  }
+
+  function openBlackBookReport(blackbookselect, mode)
+  {
+    var selectedvalue = blackbookselect.val();
+    if (selectedvalue == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+
+    var parameters = '';
+    if (checkNonNegativeIntegerFormat(selectedvalue))
+    {
+      parameters = '&savedexternalreportid=' + selectedvalue;
+    }
+    else
+    {
+      parameters = '&customerid=11065&reporttype=' + selectedvalue;
+    }
+
+    window.open('/plm.net/customers/reports/BlackBookReport.aspx?mode=' + mode + parameters, '_blank');
+  }
+
+  function openDecisionLogicReport(decisionlogicselect, mode)
+  {
+    var selectedid = decisionlogicselect.val();
+    if (selectedid == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+    window.open('/plm.net/customers/reports/DecisionLogicReport.aspx?mode=' + mode + '&reportid=' + selectedid, '_blank');
+  }
+
+  function openMicroBiltIbvReport(microbiltselect, mode)
+  {
+    var selectedid = microbiltselect.val();
+    if (selectedid == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+    window.open('/plm.net/customers/reports/MicroBiltIbvReport.aspx?mode=' + mode + '&reportid=' + selectedid, '_blank');
+  }
+
+  function openFactorTrustIbvReport(factortrustibvselect, mode)
+  {
+    var selectedid = factortrustibvselect.val();
+    if (selectedid == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+    window.open('/plm.net/customers/reports/FactorTrustIbvReport.aspx?mode=' + mode + '&reportid=' + selectedid, '_blank');
+  }
+
+  function openTransUnionAQReport(transunionaqselect, mode)
+  {
+    var selectedid = transunionaqselect.val();
+    if (selectedid == '')
+    {
+      showAlert('Please select report');
+      return;
+    }
+    window.open('/plm.net/customers/reports/TransUnionAuthenticationQuestionnaireReport.aspx?mode=' + mode + '&reportid=' + selectedid, '_blank');
+  }
+
+  var reportSpanClass = new Array('InternalClassificationSpan', 'ClvSpan', 'DataXSpan', 'FtSpan', 'TeletrackSpan', 'VeritecSpan', 'TransUnionSpan', 'AccurintSpan', 'ClaritySpan', 'MicroBiltSpan', 'GdsLinkSpan', 'BlackBookSpan', 'DecisionLogicSpan', 'MicroBiltIbvSpan', 'FactorTrustIbvSpan', 'TransUnionAQSpan');
+
+  function hideShowSpan(spanClass, tableId)
+  {
+    for (var i = 0; i < reportSpanClass.length; i++)
+    {
+      if (reportSpanClass[i] == spanClass)
       {
-        hasCustomers = true;
-        return;
+        $('#'+tableId).find('span.' + reportSpanClass[i] + '_parent').addClass('open');
       }
-    });
-    if (!hasCustomers)
-    {
-      showAlert("Please select Customer");
-      return false;
+      else
+      {
+        $('#'+tableId).find('span.' + reportSpanClass[i] + '_parent').removeClass('open');
+      }
     }
-    if ($('#maincontent_StoreDropdown').val() == '')
-    {
-      showAlert("Please select Store");
-      return false;
-    }
-    return true;
-  }
-
-  function allMoveToStoreChecked(checkbox)
-  {
-    var checked = $(checkbox).is(':checked');
-    $('[name="storeCustomerIds"]').each(function () { if ($(this).is(':visible')) { $(this).prop('checked', checked); } });
-  }
-
-  function showEmailSentLetterDate()
-  {
-    var show = $("#maincontent_EmailSentLetters").val() != '';
-    $("#span_EmailSentLetterDate_Header").toggle(show);
-    $("#span_EmailSentLetterDate_Value").toggle(show);
-  }
-
-  function applyLoanNumberControlType()
-  {
-    var isMultiline = $("#maincontent_LoanNumbersMultiline").is(':checked');
-    $("#maincontent_LoanNumber_Singleline").toggle(!isMultiline);
-    $("#maincontent_LoanNumber_Multiline").toggle(isMultiline);
   }
 </script>
-<form method="post" action="./CustomersReport.aspx" id="form1">
-<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKMTM3MDU4NTAyOA8WBh4Mc2VhcmNocGFyYW1zMsYXAAEAAAD/////AQAAAAAAAAAMAgAAADtTaXRlLCBWZXJzaW9uPTEuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49bnVsbAwDAAAAPExvZ2ljLCBWZXJzaW9uPTEuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49bnVsbAUBAAAAJFBMTS5XZWIuQ3VzdG9tZXJzUmVwb3J0K1NlYXJjaFBhcmFtcywAAAAIcmVnaW9uaWQHc3RvcmVpZApzdG9yZXN0YXRlE2FkdmVydGlzaW5nbWV0aG9kaWQJZmlyc3RuYW1lCGxhc3RuYW1lEnNlYXJjaHJlbGF0ZWRuYW1lcwNzc24OZHJpdmVyc2xpY2Vuc2UKY3VzdG9tZXJpZAtsb2FubnVtYmVycwVlbWFpbBFiYW5rYWNjb3VudG51bWJlchVtaW5iYW5rYWNjb3VudGJhbGFuY2UVbWF4YmFua2FjY291bnRiYWxhbmNlFGRlYml0Y2FyZG51bWJlcmxhc3Q0CGVtcGxveWVyC3BheWRhdGVmcm9tCXBheWRhdGV0bwVwaG9uZQdhZGRyZXNzBGNpdHkFc3RhdGUDemlwBXdhdGNoDW1hcmtldGluZ21haWwObWFya2V0aW5nZW1haWwVbWFya2V0aW5ndGV4dG1lc3NhZ2VzDm1hcmtldGluZ3Bob25lCG1pbGl0YXJ5EWNlbGxwaG9uZXZlcmlmaWVkEWVtYWlsc2VudGxldHRlcmlkE2VtYWlsc2VudGxldHRlcmRhdGUMbG9hbkFjdGl2aXR5HWN1c3RvbWVycHJlcGFpZGNhcmRzc3RhdHVzeWVzHGN1c3RvbWVycHJlcGFpZGNhcmRzc3RhdHVzbm8JbW9udGhmcm9tB2RheWZyb20HbW9udGh0bwVkYXl0bxBkb2JzZWFyY2hyZWxhdGVkHHNraXBDdXN0b21lcnNXaXRoRGVuaWVkTG9hbnMgc2tpcEN1c3RvbWVyc1dpdGhXcml0dGVuT2ZmTG9hbnMKZnVsbFJlcG9ydAMDAQMBAQABAQMHAQEDAwEBAwMBAQEBAQMDAwMDAwMDAwQAAAAAAAAAAAAAblN5c3RlbS5OdWxsYWJsZWAxW1tTeXN0ZW0uSW50MzIsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dblN5c3RlbS5OdWxsYWJsZWAxW1tTeXN0ZW0uSW50MzIsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dblN5c3RlbS5OdWxsYWJsZWAxW1tTeXN0ZW0uSW50MzIsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dAW5TeXN0ZW0uTnVsbGFibGVgMVtbU3lzdGVtLkludDMyLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXQhvU3lzdGVtLk51bGxhYmxlYDFbW1N5c3RlbS5Eb3VibGUsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1db1N5c3RlbS5OdWxsYWJsZWAxW1tTeXN0ZW0uRG91YmxlLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXXFTeXN0ZW0uTnVsbGFibGVgMVtbU3lzdGVtLkRhdGVUaW1lLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXXFTeXN0ZW0uTnVsbGFibGVgMVtbU3lzdGVtLkRhdGVUaW1lLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXXBTeXN0ZW0uTnVsbGFibGVgMVtbU3lzdGVtLkJvb2xlYW4sIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dcFN5c3RlbS5OdWxsYWJsZWAxW1tTeXN0ZW0uQm9vbGVhbiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV1wU3lzdGVtLk51bGxhYmxlYDFbW1N5c3RlbS5Cb29sZWFuLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXXBTeXN0ZW0uTnVsbGFibGVgMVtbU3lzdGVtLkJvb2xlYW4sIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dcFN5c3RlbS5OdWxsYWJsZWAxW1tTeXN0ZW0uQm9vbGVhbiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV1wU3lzdGVtLk51bGxhYmxlYDFbW1N5c3RlbS5Cb29sZWFuLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXXBTeXN0ZW0uTnVsbGFibGVgMVtbU3lzdGVtLkJvb2xlYW4sIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dblN5c3RlbS5OdWxsYWJsZWAxW1tTeXN0ZW0uSW50MzIsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dcVN5c3RlbS5OdWxsYWJsZWAx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AQ8F4wF7IlJWUyI6IiIsIkNGRCI6In4vX0ltcG9ydC9Db21tb24vX0V4cG9ydC9hdXhmaWxlcy9EeW5hcmNoQ2FsZW5kYXIvIiwiSUMiOmZhbHNlLCJUIjoxLCJJVSI6In4vaW1hZ2VzL2NhbC5naWYiLCJFIjp0cnVlLCJWIjpmYWxzZSwiUk8iOmZhbHNlLCJUSSI6MCwiT0NVIjoiIiwiQUQiOm51bGwsIkREIjpudWxsLCJJREFGIjpudWxsLCJBIjp7InN0eWxlIjoidmVydGljYWwtYWxpZ246bWlkZGxlOyJ9fWQCHw8WAh8EaBYCAgEPZBYEAgEPEA8WAh8GZ2RkZGQCAw8QDxYCHwZnZGRkZAIgDxYCHwRoFgICAQ9kFgQCAQ8QDxYCHwZoZGRkZAIDDxAPFgIfBmhkZGRkAkUPFgIfAwUENzE3OGQCSA9kFgYCBQ8PFgIeB0VuYWJsZWRoZGQCBw8PFgIfB2hkZAIJDxYCHwMFDVBhZ2UgMSBvZiAyNDBkAkkPZBYIAgEPEGRkFgFmZAIDDxBkZBYBZmQCBQ8QZGQWAWZkAgcPEGRkFgFmZAJKD2QWAgIBDxBkZBYBZmQYEQUuY3RsMDAkTm90aWZpY2F0aW9uc0NvbnRyb2wkQ29sbGVjdGlvbnNDb3VudFZhcg8FATBkBTBjdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRBbGVydHNCdXR0b25BY3RpdmVWYXIPBQVmYWxzZWQFMGN0bDAwJE5vdGlmaWNhdGlvbnNDb250cm9sJEJsaW5rTm90aWZpY2F0aW9uc1Zhcg8FBHRydWVkBSljdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRTaWduYWxSQmFzZVVybA8FKGh0dHBzOi8vc2lnbmFscjEuaW5maW5pdHllbHMuY29tL3NpZ25hbHJkBTFjdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRUaWNrZXRzQnV0dG9uQWN0aXZlVmFyDwUFZmFsc2VkBR5fX0NvbnRyb2xzUmVxdWlyZVBvc3RCYWNrS2V5X18WBgUkY3RsMDAkbWFpbmNvbnRlbnQkU2VhcmNoUmVsYXRlZE5hbWVzBSZjdGwwMCRtYWluY29udGVudCRMb2FuTnVtYmVyc011bHRpbGluZQUcY3RsMDAkbWFpbmNvbnRlbnQkQ2hrX0FjdGl2ZQUeY3RsMDAkbWFpbmNvbnRlbnQkQ2hrX0luYWN0aXZlBR1jdGwwMCRtYWluY29udGVudCRDaGtfTm9Mb2FucwUgY3RsMDAkbWFpbmNvbnRlbnQkU2hvd0Z1bGxSZXBvcnQFKWN0bDAwJE5vdGlmaWNhdGlvbnNDb250cm9sJEFsZXJ0c0NvdW50VmFyDwUBMGQFM2N0bDAwJE5vdGlmaWNhdGlvbnNDb250cm9sJFJldmlld2luZ0J1dHRvbkFjdGl2ZVZhcg8FBWZhbHNlZAU/Y3RsMDAkTm90aWZpY2F0aW9uc0NvbnRyb2wkQ29tbXVuaWNhdGlvbk1lc3NhZ2VzQnV0dG9uQWN0aXZlVmFyDwUFZmFsc2VkBSxjdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRSZXZpZXdpbmdDb3VudFZhcg8FATBkBTVjdGwwMCROb3RpZmljYXRpb25zQ29udHJvbCRDb2xsZWN0aW9uc0J1dHRvbkFjdGl2ZVZhcg8FBWZhbHNlZAU0Y3RsMDAkTm90aWZpY2F0aW9uc0NvbnRyb2wkUHJvY2Vzc2luZ0J1dHRvbkFjdGl2ZVZhcg8FBWZhbHNlZAUtY3RsMDAkTm90aWZpY2F0aW9uc0NvbnRyb2wkUHJvY2Vzc2luZ0NvdW50VmFyDwUBMGQFM2N0bDAwJE5vdGlmaWNhdGlvbnNDb250cm9sJEZvbGxvd1Vwc0J1dHRvbkFjdGl2ZVZhcg8FBWZhbHNlZAUqY3RsMDAkTm90aWZpY2F0aW9uc0NvbnRyb2wkVGlja2V0c0NvdW50VmFyDwUDMTIyZAU4Y3RsMDAkTm90aWZpY2F0aW9uc0NvbnRyb2wkQ29tbXVuaWNhdGlvbk1lc3NhZ2VzQ291bnRWYXIPBQEwZAUsY3RsMDAkTm90aWZpY2F0aW9uc0NvbnRyb2wkRm9sbG93VXBzQ291bnRWYXIPBQEwZLYD0WoV60FDSvzZUXAR5pLdGDzG3W9Jz/F/eCibCh+t" />
 
+<style type="text/css">
+  span.reportHolder { display: block; padding: 1px 5px; border: solid 1px #3f424d; background-color:#1d2027; line-height: 30px; }
+  span.reportHolder.open { padding: 1px 3px; border: solid 1px black; background-color: #f0f0f0; width: 100%; }
+  span.reportHolder span.reportSpan { display: none; }
+  span.reportHolder.open span.reportSpan { display: inline; }
+  span.reportHolder .nowrap { white-space: nowrap; }
+  .TitleStyle { color: #fff;}
+</style>
+<table id="maincontent_ReportBarControl_TableReportBar">
+	<tr>
+		<td id="maincontent_ReportBarControl_Holder_MicroBiltIbvReportControls">
+  <span class="MicroBiltIbvSpan_parent reportHolder">
+    <span class="nowrap">
+      <a href="javascript:hideShowSpan('MicroBiltIbvSpan', 'maincontent_ReportBarControl_TableReportBar');">
+        MicroBilt IBV(1)</a><span class="reportSpan">:
+        <select name="ctl00$maincontent$ReportBarControl$MicroBiltIbvReports" id="maincontent_ReportBarControl_MicroBiltIbvReports">
+			<option value="">-- Select Saved Report --</option>
+			<option value="4405">Report [04/13/2016]</option>
 
-<script src="../_Import/Common/_Export/auxfiles/DynarchCalendar/calendar.js" type="text/javascript"></script>
-<script src="../_Import/Common/_Export/auxfiles/DynarchCalendar/calendar-en.js" type="text/javascript"></script>
-<script src="../_Import/Common/_Export/auxfiles/DynarchCalendar/calendar-setup.js" type="text/javascript"></script>
-<script src="../_Import/Common/_Export/auxfiles/DynarchCalendar/additional.js" type="text/javascript"></script><script language="javascript" src="/plm.net/JS/skmMenu.js"></script>
-<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="0AF331F4" />
-<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="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" />
-<input type="hidden" name="ctl00$maincontent$SortColumnId" id="maincontent_SortColumnId" value="0" />
-<input type="hidden" name="ctl00$maincontent$SortDirection" id="maincontent_SortDirection" value="0" />
-
-
-
-
-
-
-
-<div class="Header">
-  Customers Report
-
-  <span class="DataTableFilterExtraButtons HideWhenPrinting">
-    <a id="maincontent_EditReportLink" class="EditReportButton" title="Edit Report" href="../settings/reportoptions/EditCustomerReportOptions.aspx?reportid=1"></a>
-    <a onclick="Printing_initiate($('#form1')[0]); return false;" class="PrintButton" title="Print Report"></a>
-    <a onclick="Pdf_initiate($('#form1')[0]); return false;" class="PdfButton" title="Export to PDF"></a>
-    <a id="hideFilters" class="HideFiltersButton" title="Hide Report Filters"></a>
+		</select>
+      </span>
+    </span>
+    <span class="MicroBiltIbvSpan reportSpan nowrap">
+      <input type="button" value="Show" onclick="javascript:openMicroBiltIbvReport($('#maincontent_ReportBarControl_MicroBiltIbvReports'), 'html');" />
+      <input type="button" value="Show XML" onclick="javascript:openMicroBiltIbvReport($('#maincontent_ReportBarControl_MicroBiltIbvReports'), 'xml');" />
+    </span>
   </span>
-</div>
-
-<div id="filtersDiv">
-<table class="DataTableFilters HideWhenPrinting">
-  <tr id="maincontent_Tr_Region">
-	<td class="FilterHeader">
-      Region :
-    </td>
-	<td class="FilterValue" colspan="5">
-      <select name="ctl00$maincontent$Region" id="maincontent_Region">
-		<option selected="selected" value="">-- All Regions --</option>
-		<option value="2">California</option>
-		<option value="6">test</option>
-		<option value="1">Test Region</option>
-		<option value="7">test2</option>
-
-	</select>
-    </td>
-</tr>
-
-  <tr id="maincontent_Tr_Store">
-	<td class="FilterHeader">
-      Store :
-    </td>
-	<td class="FilterValue" colspan="5">
-      <select name="ctl00$maincontent$Store" id="maincontent_Store">
-		<option selected="selected" value="">-- All Stores --</option>
-		<option value="9">PAF</option>
-		<option value="1">Test Store</option>
-
-	</select>
-    </td>
-</tr>
-
-  
-  
-  <tr id="maincontent_Tr_Name">
-	<td class="FilterHeader">First Name :</td>
-	<td class="FilterValue">
-      <input name="ctl00$maincontent$FirstName" type="text" maxlength="255" size="20" id="maincontent_FirstName" />
-    </td>
-	<td class="FilterHeader">Last Name :</td>
-	<td class="FilterValue">
-      <input name="ctl00$maincontent$LastName" type="text" maxlength="255" size="20" id="maincontent_LastName" />
-    </td>
-	<td>
-      <input id="maincontent_SearchRelatedNames" type="checkbox" name="ctl00$maincontent$SearchRelatedNames" />
-      Search coborrower/spouse/reference names
-    </td>
-</tr>
-
-  
-  <tr id="maincontent_Tr_SsnAndDriversLicense">
-	<td id="maincontent_Td_SsnHeader" class="FilterHeader">SSN :</td>
-	<td id="maincontent_Td_SsnValue" class="FilterValue">
-      <input name="ctl00$maincontent$Ssn$SSN_0" type="text" maxlength="3" size="3" id="maincontent_Ssn_SSN_0" onFocus="filterNumericInput(this)" onKeyUp="moveToNextIfFull(this)" /> - <input name="ctl00$maincontent$Ssn$SSN_1" type="text" maxlength="2" size="2" id="maincontent_Ssn_SSN_1" onFocus="filterNumericInput(this)" onKeyUp="moveToNextIfFull(this)" /> - <input name="ctl00$maincontent$Ssn$SSN_2" type="text" maxlength="4" size="4" id="maincontent_Ssn_SSN_2" onFocus="filterNumericInput(this)" onKeyUp="moveToNextIfFull(this)" />
-    </td>
-</tr>
-
-  <tr id="maincontent_Tr_Email">
-	<td class="FilterHeader">Email :</td>
-	<td class="FilterValue" colspan="3">
-      <input name="ctl00$maincontent$Email" type="text" maxlength="255" size="20" id="maincontent_Email" />
-    </td>
-</tr>
-
-  <tr id="maincontent_Tr_AccountNumberAndLoanNumber">
-	<td id="maincontent_Td_AccountNumberHeader" class="FilterHeader">Customer# :</td>
-	<td id="maincontent_Td_AccountNumberValue" class="FilterValue">
-      <input name="ctl00$maincontent$CustomerId" type="text" size="10" id="maincontent_CustomerId" />
-    </td>
-	<td id="maincontent_Td_LoanNumberHeader" class="FilterHeader">Loan# :</td>
-	<td id="maincontent_Td_LoanNumberValue" class="FilterValue">
-      <div style="float: left;">
-        <input name="ctl00$maincontent$LoanNumber_Singleline" type="text" maxlength="50" size="20" id="maincontent_LoanNumber_Singleline" style="display: none;" />
-        <textarea name="ctl00$maincontent$LoanNumber_Multiline" rows="5" cols="22" id="maincontent_LoanNumber_Multiline" style="display: none;">
-</textarea>
-      </div>
-      <div style="float: left;">
-        <input id="maincontent_LoanNumbersMultiline" type="checkbox" name="ctl00$maincontent$LoanNumbersMultiline" onclick="applyLoanNumberControlType();" /><label for="maincontent_LoanNumbersMultiline">Multiple Loan Numbers</label>
-        <script type="text/javascript">applyLoanNumberControlType();</script>
-      </div>
-    </td>
-</tr>
-
-  <tr id="maincontent_Tr_BankAccountNumberAndDebitCardNumberLast4">
-	<td id="maincontent_Td_BankAccountNumberHeader" class="FilterHeader">Bank Account # :</td>
-	<td id="maincontent_Td_BankAccountNumberValue" class="FilterValue">
-      <input name="ctl00$maincontent$BankAccountNumber" type="text" maxlength="255" size="20" id="maincontent_BankAccountNumber" />
-    </td>
-</tr>
-
-  
-  <tr id="maincontent_Tr_EmployerAndPhone">
-	<td id="maincontent_Td_EmployerHeader" class="FilterHeader">Employer :</td>
-	<td id="maincontent_Td_EmployerValue" class="FilterValue">
-      <input name="ctl00$maincontent$Employer" type="text" maxlength="255" size="20" id="maincontent_Employer" />
-    </td>
-	<td id="maincontent_Td_PhoneHeader" class="FilterHeader">Phone :</td>
-	<td id="maincontent_Td_PhoneValue" class="FilterValue">
-      <input name="ctl00$maincontent$Phone_1" type="text" maxlength="3" size="3" id="maincontent_Phone_1" onFocus="filterNumericInput(this)" onKeyUp="moveToNextIfFull(this)" />
-      <input name="ctl00$maincontent$Phone_2" type="text" maxlength="3" size="3" id="maincontent_Phone_2" onFocus="filterNumericInput(this)" onKeyUp="moveToNextIfFull(this)" />
-      <input name="ctl00$maincontent$Phone_3" type="text" maxlength="4" size="4" id="maincontent_Phone_3" onFocus="filterNumericInput(this)" onKeyUp="moveToNextIfFull(this)" />
-    </td>
-</tr>
-
-  <tr id="maincontent_Tr_AddressAndCity">
-	<td id="maincontent_Td_AddressHeader" class="FilterHeader">Address :</td>
-	<td id="maincontent_Td_AddressValue" class="FilterValue">
-      <input name="ctl00$maincontent$Address" type="text" maxlength="255" size="20" id="maincontent_Address" />
-    </td>
-	<td id="maincontent_Td_CityHeader" class="FilterHeader">City :</td>
-	<td id="maincontent_Td_CityValue" class="FilterValue">
-      <input name="ctl00$maincontent$City" type="text" maxlength="255" size="20" id="maincontent_City" />
-    </td>
-</tr>
-
-  <tr id="maincontent_Tr_StateAndZip">
-	<td id="maincontent_Td_StateHeader" class="FilterHeader">State :</td>
-	<td id="maincontent_Td_StateValue" class="FilterValue">
-      <select name="ctl00$maincontent$State" id="maincontent_State">
-		<option selected="selected" value=""></option>
-		<option value="AK">AK</option>
-		<option value="AL">AL</option>
-		<option value="AR">AR</option>
-		<option value="AS">AS</option>
-		<option value="AZ">AZ</option>
-		<option value="CA">CA</option>
-		<option value="CO">CO</option>
-		<option value="CT">CT</option>
-		<option value="DC">DC</option>
-		<option value="DE">DE</option>
-		<option value="FL">FL</option>
-		<option value="FM">FM</option>
-		<option value="GA">GA</option>
-		<option value="GU">GU</option>
-		<option value="HI">HI</option>
-		<option value="IA">IA</option>
-		<option value="ID">ID</option>
-		<option value="IL">IL</option>
-		<option value="IN">IN</option>
-		<option value="KS">KS</option>
-		<option value="KY">KY</option>
-		<option value="LA">LA</option>
-		<option value="MA">MA</option>
-		<option value="MD">MD</option>
-		<option value="ME">ME</option>
-		<option value="MH">MH</option>
-		<option value="MI">MI</option>
-		<option value="MN">MN</option>
-		<option value="MO">MO</option>
-		<option value="MP">MP</option>
-		<option value="MS">MS</option>
-		<option value="MT">MT</option>
-		<option value="NC">NC</option>
-		<option value="ND">ND</option>
-		<option value="NE">NE</option>
-		<option value="NH">NH</option>
-		<option value="NJ">NJ</option>
-		<option value="NM">NM</option>
-		<option value="NV">NV</option>
-		<option value="NY">NY</option>
-		<option value="OH">OH</option>
-		<option value="OK">OK</option>
-		<option value="OR">OR</option>
-		<option value="PA">PA</option>
-		<option value="PR">PR</option>
-		<option value="PW">PW</option>
-		<option value="RI">RI</option>
-		<option value="SC">SC</option>
-		<option value="SD">SD</option>
-		<option value="TN">TN</option>
-		<option value="TX">TX</option>
-		<option value="UT">UT</option>
-		<option value="VA">VA</option>
-		<option value="VI">VI</option>
-		<option value="VT">VT</option>
-		<option value="WA">WA</option>
-		<option value="WI">WI</option>
-		<option value="WV">WV</option>
-		<option value="WY">WY</option>
-
-	</select>
-    </td>
-</tr>
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  <script type="text/javascript">showEmailSentLetterDate();</script>
-  <tr id="maincontent_Tr_LoanActivity">
-	<td class="FilterHeader">Customer Loans :</td>
-	<td class="FilterValue" colspan="4">
-      <input id="maincontent_Chk_Active" type="checkbox" name="ctl00$maincontent$Chk_Active" checked="checked" /><label for="maincontent_Chk_Active">Active</label>
-      &nbsp;
-      <input id="maincontent_Chk_Inactive" type="checkbox" name="ctl00$maincontent$Chk_Inactive" checked="checked" /><label for="maincontent_Chk_Inactive">Inactive</label>
-      &nbsp;
-      <input id="maincontent_Chk_NoLoans" type="checkbox" name="ctl00$maincontent$Chk_NoLoans" checked="checked" /><label for="maincontent_Chk_NoLoans">No Loans</label>
-    </td>
-</tr>
-
-   
-  
+</td>
+	</tr>
 </table>
 
-<div class="DataTableFilterButtons HideWhenPrinting">
-  <input type="submit" name="ctl00$maincontent$Btn_Search" value="Generate Report" id="maincontent_Btn_Search" />
-  <input type="submit" name="ctl00$maincontent$CsvButton" value="Export to CSV" id="maincontent_CsvButton" />
 
-  <span class="DataTableFilterExtraButtons">
-    <input id="maincontent_ShowFullReport" type="checkbox" name="ctl00$maincontent$ShowFullReport" /><label for="maincontent_ShowFullReport">Show all pages</label>
-  </span>
-</div>
-</div>
+          
+        </div>
+        
 
-<table class="PrintFiltersTable ShowWhenPrinting">
-  <tr>
-    <td class="PrintFiltersHeader">
-      Report Generated :
-    </td>
-    <td class="PrintFiltersValue">
-      
-    </td>
-  </tr>
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-</table>
+        <div id="sectionsholder"></div>
 
-<div class="Message">
-  Customers Found: 7178
-</div>
+        <script type="text/javascript">
+          for (var i=0; i<page_sections.length; i++)
+          {
+            if (!page_sections.IsPageSection)
+            {
+              $('#sectionsholder').append('<div id="section_' + page_sections[i].Id + '" class="section"></div>');
+            }
+          }
+          pageSections.getSection(currentSectionId).cachedAjaxResponse = [{"Html":"\r\n\r\n\u003cstyle type=\"text/css\"\u003e\r\n  .reviewButton\r\n  {\r\n    \r\n  }\r\n\u003c/style\u003e\r\n\u003cscript type=\"text/javascript\"\u003e\r\n  function applyLetterActionDependencies(letteractioncontrol, emailletters, documentletters, textmessageletters, faxletters, previewbutton, sendbutton, warningspan)\r\n  {\r\n    var letteraction = $(letteractioncontrol).val();\r\n    $(\u0027#\u0027 + emailletters).toggle(letteraction == \u0027send\u0027);\r\n    $(\u0027#\u0027 + documentletters).toggle(letteraction == \u0027word\u0027 || letteraction == \u0027pdf\u0027);\r\n    $(\u0027#\u0027 + textmessageletters).toggle(letteraction == \u0027textmessage\u0027);\r\n    $(\u0027#\u0027 + faxletters).toggle(letteraction == \u0027fax\u0027);\r\n\r\n    var allowed = false;\r\n    if (letteraction == \u0027send\u0027)\r\n    {\r\n      allowed = false;\r\n    }\r\n    else if (letteraction == \u0027word\u0027|| letteraction == \u0027pdf\u0027)\r\n    {\r\n      allowed = true;\r\n    }\r\n    else if (letteraction == \u0027textmessage\u0027)\r\n    {\r\n      allowed = false;\r\n    }\r\n    else if (letteraction == \u0027fax\u0027)\r\n    {\r\n      allowed = true;\r\n    }\r\n\r\n    $(\u0027#\u0027 + previewbutton).prop(\u0027disabled\u0027, !allowed);\r\n    $(\u0027#\u0027 + sendbutton).prop(\u0027disabled\u0027, !allowed);\r\n\r\n    if (allowed)\r\n    {\r\n      $(\u0027#\u0027 + warningspan).empty();\r\n    }\r\n    else\r\n    {\r\n      $(\u0027#\u0027 + warningspan).html( \u0027Contact method \u0027 + getContactMethodName(letteraction) + \u0027 disabled for this customer\u0027 );\r\n    }\r\n  }\r\n\r\n  function applyLetterActionDependencies2(letteractioncontrol)\r\n  {\r\n    applyLetterActionDependencies(letteractioncontrol, \u0027ctl00_Letter_ForEmail\u0027, \u0027ctl00_Letter_ForDocument\u0027, \u0027ctl00_Letter_ForTextMessage\u0027, \u0027ctl00_Letter_ForFax\u0027, \u0027ctl00_Btn_DoLetterActionPreview\u0027, \u0027ctl00_Btn_DoLetterActionSend\u0027, \u0027ctl00_Span_LetterWarning\u0027);\r\n  }\r\n\r\n  function disableExcludedLetterTypes(email, mail, textmessages, fax)\r\n  {\r\n    \r\n    $(\"#\" + email + \" option[value=\u00277\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u00277\u0027]\").html($(\"#\" + email + \" option[value=\u00277\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002743\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002743\u0027]\").html($(\"#\" + email + \" option[value=\u002743\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u00273\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u00273\u0027]\").html($(\"#\" + email + \" option[value=\u00273\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002740\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002740\u0027]\").html($(\"#\" + email + \" option[value=\u002740\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u00272\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u00272\u0027]\").html($(\"#\" + email + \" option[value=\u00272\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u00276\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u00276\u0027]\").html($(\"#\" + email + \" option[value=\u00276\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002744\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002744\u0027]\").html($(\"#\" + email + \" option[value=\u002744\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002745\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002745\u0027]\").html($(\"#\" + email + \" option[value=\u002745\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002712\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002712\u0027]\").html($(\"#\" + email + \" option[value=\u002712\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002776\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002776\u0027]\").html($(\"#\" + email + \" option[value=\u002776\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u00271\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u00271\u0027]\").html($(\"#\" + email + \" option[value=\u00271\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002735\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002735\u0027]\").html($(\"#\" + email + \" option[value=\u002735\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002790\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002790\u0027]\").html($(\"#\" + email + \" option[value=\u002790\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002746\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002746\u0027]\").html($(\"#\" + email + \" option[value=\u002746\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002789\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002789\u0027]\").html($(\"#\" + email + \" option[value=\u002789\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002714\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002714\u0027]\").html($(\"#\" + email + \" option[value=\u002714\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002734\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002734\u0027]\").html($(\"#\" + email + \" option[value=\u002734\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002720\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002720\u0027]\").html($(\"#\" + email + \" option[value=\u002720\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002716\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002716\u0027]\").html($(\"#\" + email + \" option[value=\u002716\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002717\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002717\u0027]\").html($(\"#\" + email + \" option[value=\u002717\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002737\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002737\u0027]\").html($(\"#\" + email + \" option[value=\u002737\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002738\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002738\u0027]\").html($(\"#\" + email + \" option[value=\u002738\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002787\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002787\u0027]\").html($(\"#\" + email + \" option[value=\u002787\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002786\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002786\u0027]\").html($(\"#\" + email + \" option[value=\u002786\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002739\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002739\u0027]\").html($(\"#\" + email + \" option[value=\u002739\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u00274\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u00274\u0027]\").html($(\"#\" + email + \" option[value=\u00274\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002713\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002713\u0027]\").html($(\"#\" + email + \" option[value=\u002713\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u00275\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u00275\u0027]\").html($(\"#\" + email + \" option[value=\u00275\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002733\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002733\u0027]\").html($(\"#\" + email + \" option[value=\u002733\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002742\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002742\u0027]\").html($(\"#\" + email + \" option[value=\u002742\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002732\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002732\u0027]\").html($(\"#\" + email + \" option[value=\u002732\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002736\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002736\u0027]\").html($(\"#\" + email + \" option[value=\u002736\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002795\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002795\u0027]\").html($(\"#\" + email + \" option[value=\u002795\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + email + \" option[value=\u002788\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + email + \" option[value=\u002788\u0027]\").html($(\"#\" + email + \" option[value=\u002788\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002728\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002728\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002728\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002729\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002729\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002729\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002753\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002753\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002753\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002752\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002752\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002752\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002750\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002750\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002750\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002747\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002747\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002747\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u00279\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u00279\u0027]\").html($(\"#\" + textmessages + \" option[value=\u00279\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002751\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002751\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002751\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002748\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002748\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002748\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002793\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002793\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002793\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002749\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002749\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002749\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002791\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002791\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002791\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002780\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002780\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002780\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002779\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002779\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002779\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002755\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002755\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002755\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002761\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002761\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002761\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002762\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002762\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002762\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002763\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002763\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002763\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002764\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002764\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002764\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002765\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002765\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002765\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002757\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002757\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002757\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002766\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002766\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002766\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002767\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002767\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002767\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002768\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002768\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002768\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002769\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002769\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002769\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002782\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002782\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002782\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002770\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002770\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002770\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002771\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002771\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002771\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002783\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002783\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002783\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002772\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002772\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002772\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002758\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002758\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002758\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002774\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002774\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002774\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002775\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002775\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002775\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002778\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002778\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002778\u0027]\").html() + \" (disabled)\");\r\n    \r\n    $(\"#\" + textmessages + \" option[value=\u002777\u0027]\").prop(\u0027disabled\u0027, true);\r\n    $(\"#\" + textmessages + \" option[value=\u002777\u0027]\").html($(\"#\" + textmessages + \" option[value=\u002777\u0027]\").html() + \" (disabled)\");\r\n    \r\n  }\r\n\r\n  function getContactMethodName(letteraction)\r\n  {\r\n    switch (letteraction)\r\n    {\r\n    case \u0027send\u0027:\r\n      return \u0027E-mail\u0027;\r\n    case \u0027word\u0027:\r\n    case \u0027pdf\u0027:\r\n      return \u0027Mail\u0027;\r\n    case \u0027textmessage\u0027:\r\n      return \u0027Text Messages\u0027;\r\n    case \u0027fax\u0027:\r\n      return \u0027Fax\u0027;\r\n    default:\r\n      return \u0027(Unknown)\u0027;\r\n    }\r\n  }\r\n\r\n  function setCheckVoided(printedCheckId)\r\n  {\r\n    if (!confirm(\u0027Are you sure you want to mark the check as voided?\u0027)) return;\r\n\r\n    postAjaxRequest(\u0027SetCheckVoided\u0027, { printedCheckId: printedCheckId })\r\n      .done(function() {\r\n        $(\".CheckVoidedSpan.lc\" + printedCheckId).toggle(true);\r\n        $(\".VoidCheckLink.lc\" + printedCheckId).toggle(false);\r\n      });\r\n  }\r\n\r\n  var approvalIssueArrayMap = Object();\r\n  \r\n\r\n  function checkApproval(loanid)\r\n  {\r\n    \r\n    if (customerWatchStatus)\r\n    {\r\n      showAlert(\u0027New loans not enabled for Watch customers\u0027);\r\n      return false;\r\n    }\r\n    \r\n\r\n    var approvalIssueArray = approvalIssueArrayMap[loanid];\r\n    if (!approvalIssueArray) return false; // Isn\u0027t supposed to happen.\r\n    if (approvalIssueArray.length == 0) return true;\r\n\r\n    var message = \u0027Can\\\u0027t approve loan because of the following issues:\\n\\n\u0027;\r\n    for (var i = 0; i \u003c approvalIssueArray.length; ++i)\r\n    {\r\n      message += \u0027  - \u0027 + approvalIssueArray[i] + \u0027\\n\u0027;\r\n    }\r\n    showAlert(message);\r\n    return false;\r\n  }\r\n\r\n  var approvalPopupTypeMap = Object();\r\n  \r\n\r\n  function openApprovalPopup(loanid)\r\n  {\r\n    var approvalPopupType = approvalPopupTypeMap[loanid];\r\n    switch (approvalPopupType)\r\n    {\r\n    case \u0027drawer\u0027:\r\n      approve_popup_selectdrawer(loanid);\r\n      return true;\r\n    case \u0027cashpass\u0027:\r\n      approve_popup_cashpass(loanid);\r\n      return true;\r\n    case \u0027carddeposit\u0027:\r\n      approve_popup_carddeposit(loanid);\r\n      return true;\r\n    default:\r\n      return !confirm(\u0027Are you sure you want to approve the loan?\u0027);\r\n    }\r\n  }\r\n\r\n  function approve_popup_selectdrawer(loanid)\r\n  {\r\n    newWindow(\"ApproveLoanSelectDrawer.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function approve_popup_cashpass(loanid)\r\n  {\r\n    newWindow(\"ApproveLoanCashpass.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function approve_popup_carddeposit(loanid)\r\n  {\r\n    newWindow(\"ApproveLoanCardDeposit.aspx?loanid=\" + loanid, 1000, 300);\r\n  }\r\n\r\n  function deny_popup(loanid)\r\n  {\r\n    newWindow(\u0027popups/EditLoanDenialReasons.aspx?loanid=\u0027 + loanid + \u0027\u0026customerdetailspageforloan=0\u0027, 700, 500);\r\n  }\r\n\r\n  function approveNcpLoan(loanid)\r\n  {\r\n    postAjaxRequest(\u0027ApproveNcpLoan\u0027, { loanid: loanid })\r\n      .done(function() {\r\n        location.reload(true);\r\n      });\r\n  }\r\n\r\n  function approveLoan(loanid)\r\n  {\r\n    if (!checkApproval(loanid))\r\n    {\r\n      return;\r\n    }\r\n    if (openApprovalPopup(loanid))\r\n    {\r\n      return;\r\n    }\r\n\r\n    postAjaxRequest(\u0027ApproveLoan\u0027, { loanid: loanid })\r\n      .done(function() {\r\n        location.reload(true);\r\n      });\r\n  }\r\n\r\n  function approveAdvance(advanceid)\r\n  {\r\n    if (openAdvanceApprovalPopup(advanceid))\r\n    {\r\n      return;\r\n    }\r\n    if (!confirm(\u0027Are you sure you want to approve advance?\u0027))\r\n    {\r\n      return;\r\n    }\r\n\r\n    postAjaxRequest(\u0027ApproveAdvance\u0027, { advanceid: advanceid })\r\n      .done(function() {\r\n        location.reload(true);\r\n      });\r\n  }\r\n\r\n  var advanceApprovalPopupTypeMap = Object();\r\n  \r\n\r\n  function openAdvanceApprovalPopup(advanceid)\r\n  {\r\n    var advanceApprovalPopupType = advanceApprovalPopupTypeMap[advanceid];\r\n    switch (advanceApprovalPopupType)\r\n    {\r\n    case \u0027drawer\u0027:\r\n      advance_approve_popup_selectdrawer(advanceid);\r\n      return true;\r\n    default:\r\n      return false;\r\n    }\r\n  }\r\n\r\n  function advance_approve_popup_selectdrawer(advanceid)\r\n  {\r\n    newWindow(\"ApproveAdvanceSelectDrawer.aspx?advanceid=\" + advanceid, 400, 200);\r\n  }\r\n\r\n  function cancelautoextension(autoextensionid, typestring)\r\n  {\r\n    if (!confirm(\u0027Are you sure you want to cancel the \u0027 + typestring + \u0027?\u0027)) return;\r\n\r\n    var cancelForm = $(\u0027[name=\"CancelForm\"]:eq(0)\u0027);\r\n    cancelForm.find(\u0027[name=\"autoextensionid\"]\u0027).val(autoextensionid);\r\n    cancelForm.submit();\r\n  }\r\n\r\n  function cancelscheduledpayment(scheduledpaymentid)\r\n  {\r\n    if (!confirm(\u0027Are you sure you want to cancel the scheduled payment?\u0027)) return;\r\n\r\n    var cancelForm = $(\u0027[name=\"CancelForm\"]:eq(0)\u0027);\r\n    cancelForm.find(\u0027[name=\"scheduledpaymentid\"]\u0027).val(scheduledpaymentid);\r\n    cancelForm.submit();\r\n  }\r\n\r\n  function addcustomfee1(loanid)\r\n  {\r\n    addfee(1, loanid);\r\n  }\r\n\r\n  function addcustomfee2(loanid)\r\n  {\r\n    addfee(6, loanid);\r\n  }\r\n\r\n  function addcustomfee3(loanid)\r\n  {\r\n    addfee(7, loanid);\r\n  }\r\n\r\n  function addcustomfee4(loanid)\r\n  {\r\n    addfee(8, loanid);\r\n  }\r\n\r\n  function addcustomfee5(loanid)\r\n  {\r\n    addfee(9, loanid);\r\n  }\r\n\r\n  function addcustomfee6(loanid)\r\n  {\r\n    addfee(10, loanid);\r\n  }\r\n\r\n  function addcustomfee7(loanid)\r\n  {\r\n    addfee(11, loanid);\r\n  }\r\n\r\n  function addcustomfee8(loanid)\r\n  {\r\n    addfee(12, loanid);\r\n  }\r\n\r\n  function addlatefee(loanid)\r\n  {\r\n    addfee(4, loanid);\r\n  }\r\n\r\n  function addotherfee(loanid)\r\n  {\r\n    addfee(3, loanid);\r\n  }\r\n\r\n  function addnsffee(loanid)\r\n  {\r\n    addfee(5, loanid);\r\n  }\r\n\r\n  function addcourtfee(loanid)\r\n  {\r\n    addfee(2, loanid);\r\n  }\r\n\r\n  function addfee(feetype, loanid)\r\n  {\r\n    newWindow(\"AddFee.aspx?loanid=\" + loanid + \"\u0026feetype=\" + feetype, 500, 300);\r\n  }\r\n\r\n  function editcustomfeesdiscount(loanid)\r\n  {\r\n    newWindow(\u0027popups/EditCustomFeesDiscount.aspx?loanid=\u0027 + loanid, 400, 150);\r\n  }\r\n\r\n  function additionalagreements(loanid)\r\n  {\r\n    newWindow(\"popups/AdditionalAgreements.aspx?loanid=\" + loanid, 800, 450, { onclose: function($iframeContainer) {\r\n      var windowContent = $iframeContainer.find(\"iframe\")[0].contentWindow;\r\n      if (windowContent.closeWindow != null)\r\n      {\r\n        windowContent.closeWindow();\r\n      }\r\n    }});\r\n  }\r\n\r\n  function ncpdata(loanid)\r\n  {\r\n    newWindow(\"popups/NcpData.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function calculatepayoff(loanid)\r\n  {\r\n    newWindow(\"popups/CalculatePayoff.aspx?loanid=\" + loanid, 400, 250);\r\n  }\r\n\r\n  function editfreeinterestdays(loanid)\r\n  {\r\n    newWindow(\"EditFreeInterestDays.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function editprocessingadmin(loanid)\r\n  {\r\n    newWindow(\"EditProcessingAdmin.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function editcollectionsadmin(loanid)\r\n  {\r\n    newWindow(\"EditCollectionsAdmin.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function editreviewingadmin(loanid)\r\n  {\r\n    newWindow(\"EditReviewingAdmin.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function promise(loanid)\r\n  {\r\n    newWindow(\"LoanPromise.aspx?loanid=\" + loanid, 600, 400);\r\n  }\r\n\r\n  function changeduedate(loanid)\r\n  {\r\n    newWindow(\"ChangeDueDate.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function changeautoextension(loanid)\r\n  {\r\n    newWindow(\"ChangeAutoextension.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function changepreferredpaymenttype(loanid)\r\n  {\r\n    newWindow(\"ChangePreferredPaymentType.aspx?loanid=\" + loanid, 400, 300);\r\n  }\r\n\r\n  function loansecurity(loanid)\r\n  {\r\n    newWindow(\"popups/EditLoanSecurity.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function changerate(loanid)\r\n  {\r\n    newWindow(\"ChangeRate.aspx?loanid=\" + loanid, 400, 300);\r\n  }\r\n\r\n  function paymenthold(loanid)\r\n  {\r\n    newWindow(\"PaymentHold.aspx?loanid=\" + loanid, 500, 300);\r\n  }\r\n\r\n  function denialreasons(loanid)\r\n  {\r\n    newWindow(\"popups/EditLoanDenialReasons.aspx?loanid=\" + loanid, 700, 500);\r\n  }\r\n\r\n  function remarks(loanid)\r\n  {\r\n    newWindow(\"LoanRemarks.aspx?loanid=\" + loanid, 700, 500);\r\n  }\r\n\r\n  function editautoextensionnewduedate(autoextensionid)\r\n  {\r\n    newWindow(\"EditAutoextensionNewDueDate.aspx?autoextensionid=\" + autoextensionid, 400, 200);\r\n  }\r\n\r\n  function editstatus(loanid)\r\n  {\r\n    newWindow(\"EditStatus.aspx?loanid=\" + loanid, 600, 400);\r\n  }\r\n\r\n  function adjustment(loanid)\r\n  {\r\n    newWindow(\"Adjustment.aspx?loanid=\" + loanid, 700, 500);\r\n  }\r\n\r\n  function popupLegal(loanid)\r\n  {\r\n    newWindow(\"popups/EditLoanLegal.aspx?loanid=\" + loanid, 700, 550);\r\n  }\r\n\r\n  function popupCoBorrowerLegal(loanid)\r\n  {\r\n    newWindow(\"popups/EditLoanLegal.aspx?loanid=\" + loanid + \"\u0026coborrower=1\", 700, 550);\r\n  }\r\n\r\n  function popupTitleCollateral(loanid)\r\n  {\r\n    newWindow(\"popups/EditLoanTitleCollateral.aspx?loanid=\" + loanid, 700, 550);\r\n  }\r\n\r\n  function popupInsurance(loanid)\r\n  {\r\n    newWindow(\"popups/EditLoanInsurance.aspx?loanid=\" + loanid, 700, 500);\r\n  }\r\n\r\n  function popupRetailProduct(loanid)\r\n  {\r\n    newWindow(\"popups/EditLoanRetailProduct.aspx?loanid=\" + loanid, 700, 500);\r\n  }\r\n\r\n  function popupLoanCustomField1(loanid)\r\n  {\r\n    newWindow(\"popups/EditLoanCustomField1.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function popupLoanCustomField2(loanid)\r\n  {\r\n    newWindow(\"popups/EditLoanCustomField2.aspx?loanid=\" + loanid, 400, 200);\r\n  }\r\n\r\n  function popupChecksFromCustomer(loanid)\r\n  {\r\n    newWindow(\"popups/ChecksFromCustomer.aspx?loanid=\" + loanid, 700, 500);\r\n  }\r\n\r\n  function popupChecksToCustomer(loanid)\r\n  {\r\n    newWindow(\"popups/ChecksToCustomer.aspx?loanid=\" + loanid, 700, 500);\r\n  }\r\n\r\n  function SendEmail(action, letterid, loanid, mode)\r\n  {\r\n    if (letterid == \u0027\u0027)\r\n    {\r\n      showAlert(\u0027Please select letter type\u0027);\r\n      return;\r\n    }\r\n\r\n    $(\"#sendingFrame\").remove();\r\n\r\n    var url = \u0027popups/PreviewLetter.aspx?action=\u0027 + action + \u0027\u0026customerid=11065\u0026letterid=\u0027 + letterid + \u0027\u0026loanid=\u0027 + loanid + \u0027\u0026mode=\u0027 + mode;\r\n\r\n    if (mode == \u0027send\u0027 \u0026\u0026 action != \u0027fax\u0027)\r\n    {\r\n      var $sendingFrame = $(\u0027\u003ciframe src=\"\u0027 + url + \u0027\" id=\"sendingFrame\"\u003e\u003c/iframe\u003e\u0027)\r\n        .css({ \u0027height\u0027: \u00270\u0027, \u0027position\u0027: \u0027absolute\u0027, \u0027top\u0027: \u0027-10000px\u0027 });\r\n      $(\u0027body\u0027).append($sendingFrame);\r\n    }\r\n    else if (mode == \u0027preview\u0027 || action == \u0027fax\u0027)\r\n    {\r\n      newWindow(url, 950, 700);\r\n    }\r\n  }\r\n\r\n  function denyAdvance(advanceid)\r\n  {\r\n    if (!confirm(\"Are you sure you want to deny advance?\"))\r\n    {\r\n      return;\r\n    }\r\n\r\n    postAjaxRequest(\u0027DenyAdvance\u0027, { advanceid: advanceid })\r\n      .done(function() {\r\n        location.reload(true);\r\n      });\r\n  }\r\n\r\n  function openDocumentManagerForLoan(loanid)\r\n  {\r\n    newWindow(\"documents/DocumentManager.aspx?loanid=\" + loanid, 700, 500, { onclose: function($iframeContainer) {\r\n      var windowContent = $iframeContainer.find(\"iframe\")[0].contentWindow;\r\n      if (windowContent.closeWindow != null)\r\n      {\r\n        windowContent.closeWindow();\r\n      }\r\n    }});\r\n  }\r\n\r\n  function openUpperLakeReport(loanid)\r\n  {\r\n    newWindow(\"popups/UpperLakeReport.aspx?loanid=\" + loanid, 800, 600);\r\n  }\r\n\u003c/script\u003e\r\n\u003cdiv id=\"NoLoanSection\" data-pageid=\"LoanView\" class=\"ProfileHeaderSection\"\u003e\r\n\r\n\u003c/div\u003e\r\n\r\n\u003cdiv id=\"LastLoanSection\" data-pageid=\"LoanView\" class=\"ProfileHeaderSection\"\u003e\r\n\u003cdiv id=\"ctl00_tr_lastloan\"\u003e\r\n    \r\n      \u003cdiv id=\"loan_9605\"\u003e\r\n        \u003cdiv class=\"Header\"\u003e\r\n            Loan# 9605 / \u003cspan id=\"ctl00_LoansRepeater_Span_Loan_Status2_0\" style=\"color:red;\"\u003eWritten Off\u003c/span\u003e, NSF1, Centralized Collections, Legal\r\n        \u003c/div\u003e\r\n        \u003ctable class=\"ProfileSectionTable\" cellpadding=\"3\" cellspacing=\"0\"\u003e\r\n        \r\n        \u003cthead id=\"ctl00_LoansRepeater_Thead1_0\"\u003e\r\n            \u003ctd colspan=\"4\"\u003e\r\n            \u003cinput type=\"button\" name=\"ctl00$LoansRepeater$ctl00$Btn_ExpressLoan\" value=\"Express Loan\" onclick=\"location.href=(\u0026quot;CreateCustomer.aspx?expressloancustomerid=11065\u0026amp;expressloanid=9605\u0026quot;); return false;__doPostBack(\u0026#39;ctl00$LoansRepeater$ctl00$Btn_ExpressLoan\u0026#39;,\u0026#39;\u0026#39;)\" id=\"ctl00_LoansRepeater_Btn_ExpressLoan_0\" /\u003e\r\n            \u003cinput type=\"button\" name=\"ctl00$LoansRepeater$ctl00$Btn_LoanPayment\" value=\"Loan Payment\" onclick=\"location.href=(\u0026quot;CreatePayment.aspx?loanid=9605\u0026quot;); return false;__doPostBack(\u0026#39;ctl00$LoansRepeater$ctl00$Btn_LoanPayment\u0026#39;,\u0026#39;\u0026#39;)\" id=\"ctl00_LoansRepeater_Btn_LoanPayment_0\" /\u003e\r\n            \u003cinput type=\"button\" name=\"ctl00$LoansRepeater$ctl00$Btn_SchedulePayment\" value=\"Schedule Payment\" id=\"ctl00_LoansRepeater_Btn_SchedulePayment_0\" disabled=\"disabled\" class=\"aspNetDisabled\" /\u003e\r\n            \u003cinput type=\"button\" name=\"ctl00$LoansRepeater$ctl00$Btn_Advance\" value=\"Advance\" id=\"ctl00_LoansRepeater_Btn_Advance_0\" disabled=\"disabled\" class=\"aspNetDisabled\" /\u003e\r\n            \u003cinput type=\"button\" name=\"ctl00$LoansRepeater$ctl00$Btn_PaymentPlan\" value=\"Payment Plan\" onclick=\"location.href=(\u0026quot;PaymentPlan.aspx?loanid=9605\u0026quot;); return false;__doPostBack(\u0026#39;ctl00$LoansRepeater$ctl00$Btn_PaymentPlan\u0026#39;,\u0026#39;\u0026#39;)\" id=\"ctl00_LoansRepeater_Btn_PaymentPlan_0\" /\u003e\r\n            \u003cinput type=\"button\" name=\"ctl00$LoansRepeater$ctl00$Btn_Adjustment\" value=\"Adjustment\" onclick=\"adjustment(9605); return false;__doPostBack(\u0026#39;ctl00$LoansRepeater$ctl00$Btn_Adjustment\u0026#39;,\u0026#39;\u0026#39;)\" id=\"ctl00_LoansRepeater_Btn_Adjustment_0\" /\u003e\r\n            \r\n            \r\n            \r\n            \r\n            \r\n            \u003cspan style=\"float: right;\"\u003e\r\n              \u003ca id=\"ctl00_LoansRepeater_NotesLink_0\" class=\"WordOnButton\" href=\"javascript:openLoanNotes(9605);\"\u003eNotes\u003c/a\u003e\r\n            \u003c/span\u003e\r\n            \u003cspan style=\"float: right;\"\u003e\r\n              \u003ca id=\"ctl00_LoansRepeater_FilesLink_0\" class=\"WordOnButton\" href=\"javascript:openDocumentManagerForLoan(9605);\"\u003eFiles\u003c/a\u003e\r\n            \u003c/span\u003e\r\n            \r\n            \u003c/td\u003e\r\n        \u003c/thead\u003e\r\n        \r\n\r\n        \r\n\r\n        \r\n        \r\n        \r\n\r\n        \r\n        \u003ctr class=\"LoanNotificationRow\"\u003e\r\n            \u003ctd colspan=\"4\"\u003eLetters :\r\n            \u003cselect name=\"ctl00$LoansRepeater$ctl00$LetterAction\" id=\"ctl00_LoansRepeater_LetterAction_0\" onchange=\"applyLetterActionDependencies(this, \u0026quot;ctl00_LoansRepeater_Letter_ForEmail_0\u0026quot;, \u0026quot;ctl00_LoansRepeater_Letter_ForDocument_0\u0026quot;, \u0026quot;ctl00_LoansRepeater_Letter_ForTextMessage_0\u0026quot;, \u0026quot;ctl00_LoansRepeater_Letter_ForFax_0\u0026quot;, \u0026quot;ctl00_LoansRepeater_Btn_DoLetterActionPreview_0\u0026quot;, \u0026quot;ctl00_LoansRepeater_Btn_DoLetterActionSend_0\u0026quot;, \u0026quot;ctl00_LoansRepeater_Span_LetterWarning_0\u0026quot;)\"\u003e\r\n\t\u003coption value=\"send\"\u003eSend Email\u003c/option\u003e\r\n\t\u003coption value=\"word\"\u003eCreate MSWord Document\u003c/option\u003e\r\n\t\u003coption value=\"pdf\"\u003eCreate PDF Document\u003c/option\u003e\r\n\t\u003coption value=\"textmessage\"\u003eSend Text Message\u003c/option\u003e\r\n\r\n\u003c/select\u003e\r\n            \u003cselect name=\"ctl00$LoansRepeater$ctl00$Letter_ForEmail\" id=\"ctl00_LoansRepeater_Letter_ForEmail_0\" style=\"display: none;\"\u003e\r\n\t\u003coption value=\"\"\u003e-- Choose Letter --\u003c/option\u003e\r\n\t\u003coption value=\"\"\u003e-- Loan Letters --\u003c/option\u003e\r\n\t\u003coption value=\"43\"\u003e(DO NOT USE) Items needed for funding\u003c/option\u003e\r\n\t\u003coption value=\"3\"\u003e(DO NOT USE) Shoreside Loans Denial Letter\u003c/option\u003e\r\n\t\u003coption value=\"40\"\u003eAre you still interested? - Shoreside Loans application is in a pending status.\u003c/option\u003e\r\n\t\u003coption value=\"2\"\u003eCongratulations, your Shoreside Loans request is PRE-APPROVED!  \u003c/option\u003e\r\n\t\u003coption value=\"44\"\u003eLoan Denial - Shoreside Loans \u003c/option\u003e\r\n\t\u003coption value=\"45\"\u003eMissing Information on your Shoreside Loans Application\u003c/option\u003e\r\n\t\u003coption value=\"12\"\u003ePassword Reminder Letter for Shoreside Loans\u003c/option\u003e\r\n\t\u003coption value=\"76\"\u003ePlease Call - We have a few questions on your Shoreside Loans Application\u003c/option\u003e\r\n\t\u003coption value=\"1\"\u003eShoreside Loans Application Received and we are a DIRECT lender. Call us now! \u003c/option\u003e\r\n\t\u003coption value=\"35\"\u003eWelcome to Shoreside Loans!\u003c/option\u003e\r\n\t\u003coption value=\"90\"\u003eYou applied, now let Shoreside Loans help get you funded!   \u003c/option\u003e\r\n\t\u003coption value=\"46\"\u003eYour Shoreside loan request is close to cancellation! \u003c/option\u003e\r\n\t\u003coption value=\"\"\u003e-- Collection Letters --\u003c/option\u003e\r\n\t\u003coption value=\"89\"\u003eAction Required Letter\u003c/option\u003e\r\n\t\u003coption value=\"34\"\u003eCongratulations - your Shoreside Loans account is paid in full! \u003c/option\u003e\r\n\t\u003coption value=\"37\"\u003eNotice of Default - your Shoreside Loans account is 30 days past due!\u003c/option\u003e\r\n\t\u003coption value=\"38\"\u003eNotice of Default - your Shoreside Loans Account is 60 days past due!\u003c/option\u003e\r\n\t\u003coption value=\"87\"\u003eNotice of Payment Plan Cancellation\u003c/option\u003e\r\n\t\u003coption value=\"86\"\u003ePayoff Encouragement Letter\u003c/option\u003e\r\n\t\u003coption value=\"39\"\u003ePlease update your payment information with Shoreside Loans\u003c/option\u003e\r\n\t\u003coption value=\"4\"\u003ePromise to Pay Reminder Letter\u003c/option\u003e\r\n\t\u003coption value=\"5\"\u003eShoreside Loans - Returned NSF Letter\u003c/option\u003e\r\n\t\u003coption value=\"33\"\u003eShoreside Loans Payoff Request\u003c/option\u003e\r\n\t\u003coption value=\"42\"\u003eShoreside Loans Settlement Agreement and Acceptance\u003c/option\u003e\r\n\t\u003coption value=\"32\"\u003eWe want to help you with your Shoreside Loan account!\u003c/option\u003e\r\n\t\u003coption value=\"36\"\u003eYour Shoreside Loans account has been assessed a late fee.\u003c/option\u003e\r\n\t\u003coption value=\"\"\u003e-- Marketing Letters --\u003c/option\u003e\r\n\t\u003coption value=\"95\"\u003ePhone number change letter\u003c/option\u003e\r\n\r\n\u003c/select\u003e\r\n            \u003cselect name=\"ctl00$LoansRepeater$ctl00$Letter_ForDocument\" id=\"ctl00_LoansRepeater_Letter_ForDocument_0\" style=\"display: none;\"\u003e\r\n\t\u003coption value=\"\"\u003e-- Choose Letter --\u003c/option\u003e\r\n\t\u003coption value=\"\"\u003e-- Loan Letters --\u003c/option\u003e\r\n\t\u003coption value=\"43\"\u003e(DO NOT USE) Items needed for funding\u003c/option\u003e\r\n\t\u003coption value=\"3\"\u003e(DO NOT USE) Shoreside Loans Denial Letter\u003c/option\u003e\r\n\t\u003coption value=\"40\"\u003eAre you still interested? - Shoreside Loans application is in a pending status.\u003c/option\u003e\r\n\t\u003coption value=\"2\"\u003eCongratulations, your Shoreside Loans request is PRE-APPROVED!  \u003c/option\u003e\r\n\t\u003coption value=\"44\"\u003eLoan Denial - Shoreside Loans \u003c/option\u003e\r\n\t\u003coption value=\"45\"\u003eMissing Information on your Shoreside Loans Application\u003c/option\u003e\r\n\t\u003coption value=\"12\"\u003ePassword Reminder Letter for Shoreside Loans\u003c/option\u003e\r\n\t\u003coption value=\"76\"\u003ePlease Call - We have a few questions on your Shoreside Loans Application\u003c/option\u003e\r\n\t\u003coption value=\"1\"\u003eShoreside Loans Application Received and we are a DIRECT lender. Call us now! \u003c/option\u003e\r\n\t\u003coption value=\"35\"\u003eWelcome to Shoreside Loans!\u003c/option\u003e\r\n\t\u003coption value=\"90\"\u003eYou applied, now let Shoreside Loans help get you funded!   \u003c/option\u003e\r\n\t\u003coption value=\"46\"\u003eYour Shoreside loan request is close to cancellation! \u003c/option\u003e\r\n\t\u003coption value=\"\"\u003e-- Collection Letters --\u003c/option\u003e\r\n\t\u003coption value=\"34\"\u003eCongratulations - your Shoreside Loans account is paid in full! \u003c/option\u003e\r\n\t\u003coption value=\"37\"\u003eNotice of Default - your Shoreside Loans account is 30 days past due!\u003c/option\u003e\r\n\t\u003coption value=\"38\"\u003eNotice of Default - your Shoreside Loans Account is 60 days past due!\u003c/option\u003e\r\n\t\u003coption value=\"87\"\u003eNotice of Payment Plan Cancellation\u003c/option\u003e\r\n\t\u003coption value=\"86\"\u003ePayoff Encouragement Letter\u003c/option\u003e\r\n\t\u003coption value=\"39\"\u003ePlease update your payment information with Shoreside Loans\u003c/option\u003e\r\n\t\u003coption value=\"4\"\u003ePromise to Pay Reminder Letter\u003c/option\u003e\r\n\t\u003coption value=\"5\"\u003eShoreside Loans - Returned NSF Letter\u003c/option\u003e\r\n\t\u003coption value=\"33\"\u003eShoreside Loans Payoff Request\u003c/option\u003e\r\n\t\u003coption value=\"42\"\u003eShoreside Loans Settlement Agreement and Acceptance\u003c/option\u003e\r\n\t\u003coption value=\"32\"\u003eWe want to help you with your Shoreside Loan account!\u003c/option\u003e\r\n\t\u003coption value=\"36\"\u003eYour Shoreside Loans account has been assessed a late fee.\u003c/option\u003e\r\n\t\u003coption value=\"\"\u003e-- Marketing Letters --\u003c/option\u003e\r\n\r\n\u003c/select\u003e\r\n            \u003cselect name=\"ctl00$LoansRepeater$ctl00$Letter_ForTextMessage\" id=\"ctl00_LoansRepeater_Letter_ForTextMessage_0\" style=\"display: none;\"\u003e\r\n\t\u003coption value=\"\"\u003e-- Choose Letter --\u003c/option\u003e\r\n\t\u003coption value=\"53\"\u003eText - Application Received (1) Auto\u003c/option\u003e\r\n\t\u003coption value=\"52\"\u003eText - Are you Still interested? (3)\u003c/option\u003e\r\n\t\u003coption value=\"50\"\u003eText - E-signature needed \u003c/option\u003e\r\n\t\u003coption value=\"47\"\u003eText - Incomplete Application\u003c/option\u003e\r\n\t\u003coption value=\"9\"\u003eText - Loan Approval \u003c/option\u003e\r\n\t\u003coption value=\"51\"\u003eText - Loan Pre-Approved (2)\u003c/option\u003e\r\n\t\u003coption value=\"48\"\u003eText - Missing Information \u003c/option\u003e\r\n\t\u003coption value=\"93\"\u003eText - Pre-Underwriting\u003c/option\u003e\r\n\t\u003coption value=\"49\"\u003eText - Withdrawn Loan Request within 24 hours\u003c/option\u003e\r\n\t\u003coption value=\"91\"\u003eText - You applied, now let\u0026#39;s get you funded!   \u003c/option\u003e\r\n\t\u003coption value=\"80\"\u003eWELCOME TEXT\u003c/option\u003e\r\n\t\u003coption value=\"79\"\u003eYou\u0026#39;re approved! \u003c/option\u003e\r\n\t\u003coption value=\"55\"\u003eText - 1-Day Past Due\u003c/option\u003e\r\n\t\u003coption value=\"61\"\u003eText - 10-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"62\"\u003eText - 14-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"63\"\u003eText - 17-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"64\"\u003eText - 21-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"65\"\u003eText - 26 - Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"57\"\u003eText - 3-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"66\"\u003eText - 30-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"67\"\u003eText - 35-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"68\"\u003eText - 42-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"69\"\u003eText - 45-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"70\"\u003eText - 49-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"71\"\u003eText - 56-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"72\"\u003eText - 59-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"58\"\u003eText - 7-Days Past Due\u003c/option\u003e\r\n\t\u003coption value=\"74\"\u003eText - NSF\u003c/option\u003e\r\n\t\u003coption value=\"75\"\u003eText - Paid In Full\u003c/option\u003e\r\n\t\u003coption value=\"78\"\u003eText - Payment Reminder \u003c/option\u003e\r\n\t\u003coption value=\"77\"\u003eText- 5 days past due\u003c/option\u003e\r\n\r\n\u003c/select\u003e\r\n            \u003cselect name=\"ctl00$LoansRepeater$ctl00$Letter_ForFax\" id=\"ctl00_LoansRepeater_Letter_ForFax_0\" style=\"display: none;\"\u003e\r\n\t\u003coption value=\"\"\u003e-- Choose Letter --\u003c/option\u003e\r\n\r\n\u003c/select\u003e\r\n            \u003cinput type=\"submit\" name=\"ctl00$LoansRepeater$ctl00$Btn_DoLetterActionPreview\" value=\"Preview\" onclick=\"SendEmail($(\u0026#39;#ctl00_LoansRepeater_LetterAction_0\u0026#39;).val(), $(\u0026#39;#ctl00_LoansRepeater_LetterAction_0\u0026#39;).val() == \u0026#39;send\u0026#39; ? $(\u0026#39;#ctl00_LoansRepeater_Letter_ForEmail_0\u0026#39;).val() : ($(\u0026#39;#ctl00_LoansRepeater_LetterAction_0\u0026#39;).val() == \u0026#39;word\u0026#39; || $(\u0026#39;#ctl00_LoansRepeater_LetterAction_0\u0026#39;).val() == \u0026#39;pdf\u0026#39;) ? $(\u0026#39;#ctl00_LoansRepeater_Letter_ForDocument_0\u0026#39;).val() : $(\u0026#39;#ctl00_LoansRepeater_LetterAction_0\u0026#39;).val() == \u0026#39;textmessage\u0026#39; ? $(\u0026#39;#ctl00_LoansRepeater_Letter_ForTextMessage_0\u0026#39;).val() : $(\u0026#39;#ctl00_LoansRepeater_Letter_ForFax_0\u0026#39;).val(), \u0026#39;9605\u0026#39;, \u0026#39;preview\u0026#39;); return false;\" id=\"ctl00_LoansRepeater_Btn_DoLetterActionPreview_0\" /\u003e\r\n            \u003cinput type=\"submit\" name=\"ctl00$LoansRepeater$ctl00$Btn_DoLetterActionSend\" value=\"Send\" onclick=\"SendEmail($(\u0026#39;#ctl00_LoansRepeater_LetterAction_0\u0026#39;).val(), $(\u0026#39;#ctl00_LoansRepeater_LetterAction_0\u0026#39;).val() == \u0026#39;send\u0026#39; ? $(\u0026#39;#ctl00_LoansRepeater_Letter_ForEmail_0\u0026#39;).val() : ($(\u0026#39;#ctl00_LoansRepeater_LetterAction_0\u0026#39;).val() == \u0026#39;word\u0026#39; || $(\u0026#39;#ctl00_LoansRepeater_LetterAction_0\u0026#39;).val() == \u0026#39;pdf\u0026#39;) ? $(\u0026#39;#ctl00_LoansRepeater_Letter_ForDocument_0\u0026#39;).val() : $(\u0026#39;#ctl00_LoansRepeater_LetterAction_0\u0026#39;).val() == \u0026#39;textmessage\u0026#39; ? $(\u0026#39;#ctl00_LoansRepeater_Letter_ForTextMessage_0\u0026#39;).val() : $(\u0026#39;#ctl00_LoansRepeater_Letter_ForFax_0\u0026#39;).val(), \u0026#39;9605\u0026#39;, \u0026#39;send\u0026#39;); return false;\" id=\"ctl00_LoansRepeater_Btn_DoLetterActionSend_0\" /\u003e\r\n            \u003cspan id=\"ctl00_LoansRepeater_Span_LetterWarning_0\" style=\"color: #666666;\"\u003e\u003c/span\u003e\r\n            \u003cscript type=\"text/javascript\"\u003e\r\n              disableExcludedLetterTypes(\u0027ctl00_LoansRepeater_Letter_ForEmail_0\u0027, \u0027ctl00_LoansRepeater_Letter_ForDocument_0\u0027, \u0027ctl00_LoansRepeater_Letter_ForTextMessage_0\u0027, \u0027ctl00_LoansRepeater_Letter_ForFax_0\u0027);\r\n              applyLetterActionDependencies($(\u0027#ctl00_LoansRepeater_LetterAction_0\u0027)[0], \u0027ctl00_LoansRepeater_Letter_ForEmail_0\u0027, \u0027ctl00_LoansRepeater_Letter_ForDocument_0\u0027, \u0027ctl00_LoansRepeater_Letter_ForTextMessage_0\u0027, \u0027ctl00_LoansRepeater_Letter_ForFax_0\u0027, \u0027ctl00_LoansRepeater_Btn_DoLetterActionPreview_0\u0027, \u0027ctl00_LoansRepeater_Btn_DoLetterActionSend_0\u0027, \u0027ctl00_LoansRepeater_Span_LetterWarning_0\u0027);\r\n            \u003c/script\u003e\r\n            \u003c/td\u003e\r\n        \u003c/tr\u003e\r\n        \r\n\r\n        \r\n\r\n        \u003c!--pending--\u003e\r\n        \r\n        \u003c!-- common loan fields--\u003e\r\n        \u003ctr valign=\"middle\"\u003e\r\n            \u003ctd style=\"width: 25%\"\u003eCreated :\u003c/td\u003e\r\n            \u003ctd style=\"width: 25%\"\u003e4/12/2016 3:03:46 PM\u003c/td\u003e\r\n            \u003ctd style=\"width: 25%\"\u003eOrigin :\u003c/td\u003e\r\n            \u003ctd style=\"width: 25%\"\u003eLead (LenderEdge Cap $40)\u003c/td\u003e\r\n        \u003c/tr\u003e\r\n        \r\n        \u003ctr valign=\"middle\"\u003e\r\n\t\u003ctd\u003eApproved :\u003c/td\u003e\r\n\t\u003ctd\u003e4/15/2016 10:51:45 AM\u003c/td\u003e\r\n\t\u003ctd\u003eApproved Admin :\u003c/td\u003e\r\n\t\u003ctd\u003eNora Dozier\u003c/td\u003e\r\n\u003c/tr\u003e\r\n\r\n        \r\n        \r\n        \u003ctr valign=\"middle\"\u003e\r\n\t\u003ctd\u003eWritten Off :\u003c/td\u003e\r\n\t\u003ctd\u003e11/9/2016 12:44:27 AM\u003c/td\u003e\r\n\t\u003ctd\u003eWritten Off Admin :\u003c/td\u003e\r\n\t\u003ctd\u003e-\u003c/td\u003e\r\n\u003c/tr\u003e\r\n\r\n        \u003ctr valign=\"middle\"\u003e\r\n\t\u003ctd\u003e\r\n            \r\n            \u003c/td\u003e\r\n\t\u003ctd\u003e\r\n            \r\n            \u003c/td\u003e\r\n\t\u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_ProcessingAdminLink_0\" href=\"javascript:editprocessingadmin(9605);\"\u003eProcessing Admin:\u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n\t\u003ctd\u003ePaul Weihert\u003c/td\u003e\r\n\u003c/tr\u003e\r\n\r\n        \u003ctr valign=\"middle\"\u003e\r\n\t\u003ctd\u003e\u003c/td\u003e\r\n\t\u003ctd\u003e\u003c/td\u003e\r\n\t\u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_CollectionsAdminLink_0\" href=\"javascript:editcollectionsadmin(9605);\"\u003eCollections Admin:\u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n\t\u003ctd\u003eDiana Lugo\u003c/td\u003e\r\n\u003c/tr\u003e\r\n\r\n        \u003ctr valign=\"middle\"\u003e\r\n\t\u003ctd\u003e\u003c/td\u003e\r\n\t\u003ctd\u003e\u003c/td\u003e\r\n\t\u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_ReviewingAdminLink_0\" href=\"javascript:editreviewingadmin(9605);\"\u003eReviewing Admin:\u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n\t\u003ctd\u003e\r\n            -\r\n            \u003c/td\u003e\r\n\u003c/tr\u003e\r\n\r\n        \r\n        \u003ctr valign=\"middle\"\u003e\r\n            \u003ctd\u003eStore / Loan Type: \u003c/td\u003e\r\n            \u003ctd\u003e\u003cspan\u003ePAF / Installment\u003c/td\u003e\r\n            \u003ctd\u003eOrigination Date :\u003c/td\u003e\r\n            \u003ctd\u003e\u003cspan\u003e04/15/2016\u003c/span\u003e\u003c/td\u003e\r\n        \u003c/tr\u003e\r\n        \u003ctr valign=\"middle\"\u003e\r\n            \u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_LoanStatusLink_0\" class=\"LoanStatusLink\" href=\"javascript:editstatus(9605);\"\u003e\u003cb\u003eStatus:\u003c/b\u003e\u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n            \u003ctd\u003e\u003cspan\u003e\u003cb\u003e\u003cspan id=\"ctl00_LoansRepeater_Span_Loan_Status_0\" style=\"color:red;\"\u003eWritten Off\u003c/span\u003e, NSF1, Centralized Collections, Legal\u003c/b\u003e\u003c/span\u003e\u003c/td\u003e\r\n            \u003ctd\u003e\r\n            \r\n            \u003c/td\u003e\r\n            \u003ctd\u003e\r\n            \r\n            \u003c/td\u003e\r\n        \u003c/tr\u003e\r\n        \u003ctr valign=\"middle\"\u003e\r\n            \u003ctd\u003eAmount :\u003c/td\u003e\r\n            \u003ctd\u003e\u003cspan\u003e$2,600.00 / ACH\u003c/span\u003e\u003c/td\u003e\r\n            \u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_PreferredPaymentTypeLink_0\" href=\"javascript:changepreferredpaymenttype(9605);\"\u003eEnabled/Preferred Payment Types:\u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n            \u003ctd\u003eCash, Check, Money Order, \u003cb\u003eACH\u003c/b\u003e, Debit/Credit Card\u003c/td\u003e\r\n        \u003c/tr\u003e\r\n        \u003ctr valign=\"middle\"\u003e\r\n            \u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_RateLink_0\" href=\"javascript:changerate(9605);\"\u003eRate:\u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n            \u003ctd\u003e0%, Disclosed APR 178.11 %\u003c/td\u003e\r\n            \u003ctd\u003eDaily Interest: \u003c/td\u003e\r\n            \u003ctd\u003e$0.00\u003c/td\u003e\r\n        \u003c/tr\u003e\r\n        \r\n        \u003ctr valign=\"middle\"\u003e\r\n            \u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_DueDateLink_0\" href=\"javascript:changeduedate(9605);\"\u003e\u003cb\u003eDue Date:\u003c/b\u003e\u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n            \u003ctd\u003e\u003cb\u003e05/13/2016\u003c/b\u003e (301 days late)\u003c/td\u003e\r\n            \u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_AutoextensionLink_0\" href=\"javascript:changeautoextension(9605);\"\u003eAutoextension:\u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n            \u003ctd\u003eDefault (Auto Payment Schedule (Exact Amount))\u003c/td\u003e\r\n        \u003c/tr\u003e\r\n        \u003ctr valign=\"middle\"\u003e\r\n            \u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_PaymentHoldLink_0\" href=\"javascript:paymenthold(9605);\"\u003ePayment Hold:\u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n            \u003ctd\u003e-\u003c/td\u003e\r\n            \u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_FreeInterestDaysLink_0\" class=\"aspNetDisabled\"\u003eFree Interest Days:\u003c/a\u003e\r\n                \r\n            \u003c/td\u003e\r\n            \u003ctd\u003e-\u003c/td\u003e\r\n        \u003c/tr\u003e\r\n        \u003ctr valign=\"middle\"\u003e\r\n\t\u003ctd colspan=\"2\" valign=\"top\"\u003e\r\n            \u003ctable cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"\u003e\r\n                \u003ctr\u003e\r\n                \u003ctd width=\"50%\"\u003e\u003cb\u003eTotal Due :\u003c/b\u003e\u003c/td\u003e\r\n                \u003ctd style=\"padding: 3px;\" width=\"50%\"\u003e\u003cb\u003e$3,771.14\u003c/b\u003e\u003c/td\u003e\r\n                \u003c/tr\u003e\r\n                \u003ctr\u003e\r\n                \u003ctd\u003e\u0026nbsp;Principal Due :\u003c/td\u003e\r\n                \u003ctd style=\"padding: 3px;\"\u003e\u0026nbsp;$2,600.00\u003c/td\u003e\r\n                \u003c/tr\u003e\r\n                \u003ctr\u003e\r\n                \u003ctd\u003e\u0026nbsp;Interest Due :\u003c/td\u003e\r\n                \u003ctd style=\"padding: 3px;\"\u003e\u0026nbsp;$1,066.14\u003c/td\u003e\r\n                \u003c/tr\u003e\r\n                \u003ctr\u003e\r\n                \u003ctd\u003e\u0026nbsp;Back Interest Due :\u003c/td\u003e\r\n                \u003ctd style=\"padding: 3px;\"\u003e\u0026nbsp;$0.00\u003c/td\u003e\r\n                \u003c/tr\u003e\r\n                \u003ctr\u003e\r\n                \u003ctd\u003e\u0026nbsp;Total Interest Due :\u003c/td\u003e\r\n                \u003ctd style=\"padding: 3px;\"\u003e\u0026nbsp;$1,066.14\u003c/td\u003e\r\n                \u003c/tr\u003e\r\n                \r\n            \u003c/table\u003e\r\n            \u003c/td\u003e\r\n\t\u003ctd colspan=\"2\" valign=\"top\"\u003e\r\n            \u003ctable cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"\u003e\r\n                \u003ctr id=\"ctl00_LoansRepeater_CustomFee1Tr_0\"\u003e\r\n\t\t\u003ctd width=\"50%\"\u003e\r\n                    \u003ca id=\"ctl00_LoansRepeater_CustomFee1Link_0\" href=\"javascript:addcustomfee1(9605);\"\u003eOrigination Fee\u003c/a\u003e:\r\n                \u003c/td\u003e\r\n\t\t\u003ctd style=\"padding: 3px;\" width=\"50%\"\u003e$75.00\u003c/td\u003e\r\n\t\u003c/tr\u003e\r\n\t\r\n                \r\n                \r\n                \r\n                \r\n                \r\n                \r\n                \r\n                \u003ctr\u003e\r\n                \u003ctd width=\"50%\"\u003e\r\n                    \u003ca id=\"ctl00_LoansRepeater_NsfFeeLink_0\" href=\"javascript:addnsffee(9605);\"\u003eNSF Fee Due\u003c/a\u003e:\r\n                \u003c/td\u003e\r\n                \u003ctd style=\"padding: 3px;\" width=\"50%\"\u003e$15.00\u003c/td\u003e\r\n                \u003c/tr\u003e\r\n                \u003ctr\u003e\r\n                \u003ctd\u003e\r\n                    \u003ca id=\"ctl00_LoansRepeater_LateFeeLink_0\" href=\"javascript:addlatefee(9605);\"\u003eLate Fee Due\u003c/a\u003e:\r\n                \u003c/td\u003e\r\n                \u003ctd style=\"padding: 3px;\"\u003e$15.00\u003c/td\u003e\r\n                \u003c/tr\u003e\r\n                \u003ctr\u003e\r\n                \u003ctd\u003e\r\n                    \u003ca id=\"ctl00_LoansRepeater_OtherFeeLink_0\" href=\"javascript:addotherfee(9605);\"\u003eOther Fee Due\u003c/a\u003e:\r\n                \u003c/td\u003e\r\n                \u003ctd style=\"padding: 3px;\"\u003e$0.00\u003c/td\u003e\r\n                \u003c/tr\u003e\r\n                \u003ctr\u003e\r\n                \u003ctd\u003e\r\n                    \u003ca id=\"ctl00_LoansRepeater_CourtFeeLink_0\" href=\"javascript:addcourtfee(9605);\"\u003eCourt Fee Due\u003c/a\u003e\r\n                \u003c/td\u003e\r\n                \u003ctd style=\"padding: 3px;\"\u003e\r\n                    $0.00\r\n                \u003c/td\u003e\r\n                \u003c/tr\u003e\r\n                \r\n            \u003c/table\u003e\r\n            \u003c/td\u003e\r\n\u003c/tr\u003e\r\n\r\n        \u003ctr valign=\"middle\"\u003e\r\n\t\u003ctd\u003eLast Payment Date :\u003c/td\u003e\r\n\t\u003ctd\u003e\r\n            -\r\n            \u003c/td\u003e\r\n\t\u003ctd\u003eTotal Paid :\u003c/td\u003e\r\n\t\u003ctd\u003e\r\n            $0.00\u0026nbsp;(0 payments)\r\n            \u003c/td\u003e\r\n\u003c/tr\u003e\r\n\r\n        \u003ctr valign=\"middle\"\u003e\r\n\t\u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_PromiseDateLink_0\" href=\"javascript:promise(9605);\"\u003ePromise Date:\u003c/a\u003e\r\n            \u003c/td\u003e\r\n\t\u003ctd\u003e-\u003c/td\u003e\r\n\t\u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_PromiseAmountLink_0\" href=\"javascript:promise(9605);\"\u003ePromise Amount:\u003c/a\u003e\r\n            \u003c/td\u003e\r\n\t\u003ctd\u003e-\u003c/td\u003e\r\n\u003c/tr\u003e\r\n\r\n        \u003ctr valign=\"middle\"\u003e\r\n            \u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_RemarksLink_0\" href=\"javascript:remarks(9605);\"\u003eLoan Remarks\u003c/a\u003e :\r\n            \u003c/td\u003e\r\n            \u003ctd\u003e-\u003c/td\u003e\r\n            \u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_LoanSecurityLink_0\" href=\"javascript:loansecurity(9605);\"\u003eLoan Security :\u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n            \u003ctd\u003e\u003cspan\u003eChecking Account\u003c/span\u003e\u003c/td\u003e\r\n        \u003c/tr\u003e\r\n        \u003ctr valign=\"middle\"\u003e\r\n            \u003ctd valign=\"top\"\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_ChecksFromCustomerLink_0\" href=\"javascript:popupChecksFromCustomer(9605);\"\u003eChecks From Customer :\u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n            \u003ctd valign=\"top\" style=\"padding-top: 0;\"\u003e\r\n            \u003ctable cellspacing=\"0\" style=\"width: 100%;\"\u003e\r\n                \r\n            \u003c/table\u003e\r\n            -\r\n            \u003c/td\u003e\r\n            \u003ctd valign=\"top\"\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_ChecksToCustomerLink_0\" href=\"javascript:popupChecksToCustomer(9605);\"\u003eChecks To Customer :\u003c/a\u003e\r\n                \r\n            \u003c/td\u003e\r\n            \u003ctd valign=\"top\" style=\"padding-top: 0;\"\u003e\r\n            \u003ctable cellspacing=\"0\" style=\"width: 100%;\"\u003e\r\n                \r\n            \u003c/table\u003e\r\n            -\r\n            \u003c/td\u003e\r\n        \u003c/tr\u003e\r\n        \u003c/table\u003e\r\n        \u003ctable cellspacing=\"0\" cellpadding=\"1\" style=\"width:100%;\"\u003e\r\n          \u003ctr\u003e\r\n            \u003ctd style=\"vertical-align:top; border-bottom:1px solid #ddd;\"\u003e\u003ca href=\"javascript: popupLegal(9605)\"\u003eLegal\u003c/a\u003e :\u003c/td\u003e\r\n            \u003ctd style=\"border-bottom:1px solid #ddd;\"\u003e\r\n              \r\n              \u003ctable cellspacing=\"0\" cellpadding=\"1\" style=\"width:100%;\"\u003e\r\n                \u003ctr\u003e\r\n                  \u003ctd style=\"text-align: right;\"\u003eFile Date :\u003c/td\u003e\r\n                  \u003ctd\u003e06/15/2016\u003c/td\u003e\r\n                  \u003ctd style=\"text-align: right;\"\u003eLast Serve Date :\u003c/td\u003e\r\n                  \u003ctd\u003e\u003c/td\u003e\r\n                  \u003ctd style=\"text-align: right;\"\u003ePay Amount :\u003c/td\u003e\r\n                  \u003ctd\u003e\u003c/td\u003e\r\n                  \u003ctd style=\"text-align: right;\"\u003eJudgment Amount :\u003c/td\u003e\r\n                  \u003ctd\u003e\u003c/td\u003e\r\n                \u003c/tr\u003e\r\n                \u003ctr\u003e\r\n                  \u003ctd style=\"text-align: right;\"\u003eCourt Date :\u003c/td\u003e\r\n                  \u003ctd\u003e08/10/2016\u003c/td\u003e\r\n                  \u003ctd style=\"text-align: right;\"\u003eProof Service Date :\u003c/td\u003e\r\n                  \u003ctd\u003e\u003c/td\u003e\r\n                  \u003ctd style=\"text-align: right;\"\u003eFrequency :\u003c/td\u003e\r\n                  \u003ctd\u003e\u003c/td\u003e\r\n                  \u003ctd style=\"text-align: right;\"\u003eJudgment Date :\u003c/td\u003e\r\n                  \u003ctd\u003e\u003c/td\u003e\r\n                \u003c/tr\u003e\r\n                \u003ctr\u003e\r\n                  \u003ctd style=\"text-align: right;\"\u003eTime Dept Court :\u003c/td\u003e\r\n                  \u003ctd\u003e\u003c/td\u003e\r\n                  \u003ctd style=\"text-align: right;\"\u003eWait Date :\u003c/td\u003e\r\n                  \u003ctd\u003e\u003c/td\u003e\r\n                  \u003ctd style=\"text-align: right;\"\u003eCase # :\u003c/td\u003e\r\n                  \u003ctd\u003e\u003c/td\u003e\r\n                  \u003ctd\u003e\u003c/td\u003e\r\n                  \u003ctd\u003e\u003c/td\u003e\r\n                \u003c/tr\u003e\r\n              \u003c/table\u003e\r\n              \r\n            \u003c/td\u003e\r\n          \u003c/tr\u003e\r\n        \u003c/table\u003e\r\n        \r\n        \r\n\r\n        \r\n\r\n        \r\n\r\n        \u003cdiv id=\"ctl00_LoansRepeater_Tr_CustomField1_0\"\u003e\r\n          \u003ctable cellspacing=\"0\" cellpadding=\"1\" style=\"width:100%;\"\u003e\r\n              \u003ctr\u003e\r\n              \u003ctd style=\"width:25%;\"\u003e\u003ca href=\"javascript: popupLoanCustomField1(9605)\"\u003eCase Number\u003c/a\u003e :\u003c/td\u003e\r\n              \u003ctd style=\"width:25%;\"\u003e161WSC00524\u003c/td\u003e\r\n              \u003ctd style=\"width: 25%;\"\u003e\u003c/td\u003e\r\n              \u003ctd style=\"width: 25%;\"\u003e\u003c/td\u003e\r\n              \u003c/tr\u003e\r\n          \u003c/table\u003e\r\n        \u003c/div\u003e\r\n        \u003cdiv id=\"ctl00_LoansRepeater_Tr_CustomField2_0\"\u003e\r\n          \u003ctable cellspacing=\"0\" cellpadding=\"1\" style=\"width: 100%;\"\u003e\r\n            \u003ctr\u003e\r\n            \u003ctd style=\"width: 25%;\"\u003e\u003ca href=\"javascript: popupLoanCustomField2(9605)\"\u003eWrit Filing Date\u003c/a\u003e :\u003c/td\u003e\r\n            \u003ctd style=\"width: 25%;\"\u003e09/12/16\u003c/td\u003e\r\n            \u003ctd style=\"width: 25%;\"\u003e\u003c/td\u003e\r\n            \u003ctd style=\"width: 25%;\"\u003e\u003c/td\u003e\r\n            \u003c/tr\u003e\r\n          \u003c/table\u003e\r\n        \u003c/div\u003e\r\n\r\n        \r\n        \r\n        \u003ctable cellpadding=\"0\" cellspacing=\"0\" class=\"ProfileLoanBottom\"\u003e\r\n        \u003ctr\u003e\r\n            \u003ctd\u003e\r\n            \u003ca id=\"ctl00_LoansRepeater_LoanAgreementLinks_0_SingleAgreementLink_0\" class=\"SingleAgreementLink\" href=\"LoanAgreement.aspx?savedloanagreementid=2363\"\u003eAgreement\u003c/a\u003e\r\n\r\n\r\n\r\n\r\n            \u003ca href=\"PaymentSchedule.aspx?loanid=9605\" target=\"_blank\"\u003e\r\n            Payment Schedule\r\n            \u003c/a\u003e\r\n            \r\n            \u003ca href=\"AprWinDetails.aspx?loanid=9605\" target=\"_blank\"\u003e\r\n            APRWIN\r\n            \u003c/a\u003e\r\n            \r\n            \u003c/td\u003e\r\n            \u003ctd align=\"right\" style=\"vertical-align: top;\"\u003e\r\n            \u003ca href=\"javascript:calculatepayoff(9605);\"\u003eCalculate Payoff / Express Loan\u003c/a\u003e\r\n            \u003c/td\u003e\r\n        \u003c/tr\u003e\r\n        \u003c/table\u003e\r\n\r\n        \r\n        \r\n\r\n        \u003cdiv style=\"margin-bottom:40px;\"\u003e\u003c/div\u003e\r\n        \r\n      \u003c/div\u003e\r\n      \r\n\u003c/div\u003e\r\n\u003c/div\u003e\r\n","PageId":"LoanView"}][0];
+          pageSections.getSection("mainpropertiesview").cachedAjaxResponse = [{"Html":"\r\n\r\n\u003cstyle type=\"text/css\"\u003e\r\n  .gridtwocolumns { width: 100%; color: #FF0000; }\r\n  .gridtwocolumns .td1 { width: 100%; vertical-align: top; padding-bottom: 8px; }\r\n  .gridtwocolumns .td2 { width: 27px; vertical-align: middle; }\r\n  a.nohover { text-decoration:none;  }\r\n  a.nohover:hover { text-decoration:none; border: 0 none !important; }\r\n\u003c/style\u003e\r\n\u003cscript type=\"text/javascript\"\u003e\r\n  function deletefollowup(link, followupid)\r\n  {\r\n    if (!confirm(\u0027Are you sure you want to delete Follow Up?\u0027)) return;\r\n\r\n    var tr = $(link).closest(\u0027.tr-followup\u0027);\r\n\r\n    postAjaxRequest(\u0027DeleteFollowUp\u0027, { followupid: followupid }).done(function (result) { tr.remove(); });\r\n  }\r\n\r\n  function markascompleted(link, followupid)\r\n  {\r\n    if (!confirm(\u0027Are you sure you want to mark Follow Up as Completed?\u0027)) return;\r\n\r\n    var tr = $(link).closest(\u0027.tr-followup\u0027);\r\n\r\n    postAjaxRequest(\u0027CompletedFollowUp\u0027, { followupid: followupid }).done(function (result) { tr.remove(); });\r\n  }\r\n\r\n  function deletecomment(link, commentid)\r\n  {\r\n    if (!confirm(\u0027Are you sure you want to delete Comment?\u0027)) return;\r\n\r\n    var tr = $(link).closest(\u0027tr\u0027);\r\n\r\n    postAjaxRequest(\u0027DeleteComment\u0027, { commentid: commentid }).done(function (result) { tr.remove(); });\r\n  }\r\n\r\n  function showProfilePicture()\r\n  {\r\n    showOverlay($(\u0027#ctl00_CustomerProfilePicture_Holder\u0027).html(), {}, { closeOnClick: true });\r\n  }\r\n\r\n  function uploadProfilePicture()\r\n  {\r\n    newWindow(\"/plm.net/customers/documents/UploadWebcamPhoto.aspx?customerid=11065\u0026customerfiletypeid=3\", 700, 500);\r\n  }\r\n\u003c/script\u003e\r\n\u003ctable cellspacing=\"0\" cellpadding=\"0\" style=\"width:100%; table-layout: auto;\"\u003e\r\n\u003ctr\u003e\r\n\r\n\r\n\u003ctd align=\"left\" valign=\"top\" style=\"width:100%;background-color: #F5F5F5;border-bottom: 1px solid #DCDCDC;border-spacing: 0;border-top: 1px solid #DCDCDC;padding: 10px 0 10px 0;\"\u003e\r\n\u003ctable cellspacing=\"0\" cellpadding=\"0\" class=\"ProfileProperties\" style=\"padding:0; border: 0 none;\"\u003e\r\n  \u003ctr\u003e\r\n    \u003ctd\u003e\u003cb\u003eSSN :\u003c/b\u003e\u003c/td\u003e\r\n    \u003ctd\u003e\u003cb\u003e607-45-3534\u003c/b\u003e\u003c/td\u003e\r\n    \u003ctd\u003eAccount# :\u003c/td\u003e\r\n    \u003ctd\u003e11065\u003c/td\u003e\r\n    \u003ctd\u003eCreated :\u003c/td\u003e\r\n    \u003ctd\u003e04/12/2016\u003c/td\u003e\r\n  \u003c/tr\u003e\r\n  \u003ctr\u003e\r\n    \u003ctd\u003e\r\n      \u003ca id=\"ctl00_UpdateCreditLimitLink\" href=\"javascript:editcreditlimit();\"\u003eCredit Limit :\u003c/a\u003e\r\n      \r\n    \u003c/td\u003e\r\n    \u003ctd\u003e$50000\u003c/td\u003e\r\n    \u003ctd\u003e\r\n      \u003ca id=\"ctl00_UpdateStoreLink\" href=\"javascript:editstore();\"\u003eStore :\u003c/a\u003e\r\n      \r\n    \u003c/td\u003e\r\n    \u003ctd\u003ePAF\u003c/td\u003e\r\n    \u003ctd\u003eAdvertising :\u003c/td\u003e\r\n    \u003ctd\u003eOther (LenderEdge PAF $40)\u003c/td\u003e\r\n  \u003c/tr\u003e\r\n  \u003ctr\u003e\r\n    \u003ctd\u003eMilitary :\u003c/td\u003e\r\n    \u003ctd\u003e-\u003c/td\u003e\r\n    \u003ctd\u003e\r\n      \u003ca id=\"ctl00_UpdatePrivacyLink\" href=\"javascript:editprivacy();\"\u003ePrivacy :\u003c/a\u003e\r\n    \u003c/td\u003e\r\n    \u003ctd\u003e-\u003c/td\u003e\r\n    \u003ctd\u003eLanguage :\u003c/td\u003e\r\n    \u003ctd\u003eEnglish\u003c/td\u003e\r\n  \u003c/tr\u003e\r\n  \r\n\u003c/table\u003e\r\n\u003c/td\u003e\r\n\u003c/tr\u003e\r\n\u003c/table\u003e\r\n\u003ctable cellspacing=\"4\" cellpadding=\"0\" class=\"ProfileMessagesTable\"\u003e\r\n  \u003ctr\u003e\r\n    \u003ctd valign=\"top\"\u003e\r\n\r\n      \u003ctable cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"\u003e\r\n        \u003ctr\u003e\r\n          \u003ctd valign=\"top\" style=\"width:82px;\"\u003e\r\n            \u003ca id=\"ctl00_FollowUpsLink\" class=\"AButton\" href=\"javascript:followups();\" style=\"float:left;\"\u003eFollow-Ups :\u003c/a\u003e\r\n          \u003c/td\u003e\r\n          \u003ctd valign=\"top\"\u003e\r\n            \u003ctable class=\"gridtwocolumns\" cellpadding=\"0\" cellspacing=\"0\"\u003e\r\n              \r\n            \u003c/table\u003e\r\n          \u003c/td\u003e\r\n        \u003c/tr\u003e\r\n      \u003c/table\u003e\r\n\r\n    \u003c/td\u003e\r\n    \u003ctd valign=\"top\"\u003e\r\n      \u003ctable cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"\u003e\r\n        \u003ctr\u003e\r\n          \u003ctd valign=\"top\" style=\"width:82px;\"\u003e\r\n            \u003ca id=\"ctl00_CommentsLink\" class=\"AButton\" href=\"javascript:comments();\" style=\"float:left;\"\u003eComments :\u003c/a\u003e\r\n          \u003c/td\u003e\r\n          \u003ctd valign=\"top\"\u003e\r\n            \u003ctable class=\"gridtwocolumns\" cellpadding=\"0\" cellspacing=\"0\"\u003e\r\n                \r\n                    \u003ctr\u003e\r\n                      \u003ctd class=\"td1\"\u003e04/12/2016 \u0026raquo;\r\n                        \u003cspan\u003e10\u003c/span\u003e\u003c/td\u003e\r\n                      \u003ctd class=\"td2\"\u003e\r\n                      \r\n                        \u003ca class=\"DeleteButtonInList\" href=\"javascript:void(0)\" onclick=\"javascript:deletecomment(this, 18891);\" style=\"visibility:hidden;\"\u003e\u003c/a\u003e\r\n                      \r\n                      \u003c/td\u003e\r\n                    \u003c/tr\u003e\r\n                  \r\n                    \u003ctr\u003e\r\n                      \u003ctd class=\"td1\"\u003e04/14/2016 \u0026raquo;\r\n                        \u003cspan\u003eVerification of Employment:\u003cbr /\u003e\nNumber: 510 848 5100\u003cbr /\u003e\nVOE Contact: Violet\u003cbr /\u003e\nTitle/Dept of Borrower: Facilities Coordinator\u003c/span\u003e\u003c/td\u003e\r\n                      \u003ctd class=\"td2\"\u003e\r\n                      \r\n                        \u003ca class=\"DeleteButtonInList\" href=\"javascript:void(0)\" onclick=\"javascript:deletecomment(this, 19099);\" style=\"visibility:hidden;\"\u003e\u003c/a\u003e\r\n                      \r\n                      \u003c/td\u003e\r\n                    \u003c/tr\u003e\r\n                  \r\n                    \u003ctr\u003e\r\n                      \u003ctd class=\"td1\"\u003e04/15/2016 \u0026raquo;\r\n                        \u003cspan\u003eMB Approved, 90 days of Bank Statements w/ Positive Bank Balance, Debit Card, Driver\u0026#39;s License, Experian CBR, VOE complete for W2 employees (Self Employed - no VOE needed). No Scorecard needed, ability to pay confirmed.  \u003cbr /\u003e\n\u003c/span\u003e\u003c/td\u003e\r\n                      \u003ctd class=\"td2\"\u003e\r\n                      \r\n                        \u003ca class=\"DeleteButtonInList\" href=\"javascript:void(0)\" onclick=\"javascript:deletecomment(this, 19128);\" style=\"visibility:hidden;\"\u003e\u003c/a\u003e\r\n                      \r\n                      \u003c/td\u003e\r\n                    \u003c/tr\u003e\r\n                  \r\n                    \u003ctr\u003e\r\n                      \u003ctd class=\"td1\"\u003e05/17/2016 \u0026raquo;\r\n                        \u003cspan\u003eFIRST PAYMENT DEFAULT\u003c/span\u003e\u003c/td\u003e\r\n                      \u003ctd class=\"td2\"\u003e\r\n                      \r\n                        \u003ca class=\"DeleteButtonInList\" href=\"javascript:void(0)\" onclick=\"javascript:deletecomment(this, 21636);\" style=\"visibility:hidden;\"\u003e\u003c/a\u003e\r\n                      \r\n                      \u003c/td\u003e\r\n                    \u003c/tr\u003e\r\n                  \r\n                    \u003ctr\u003e\r\n                      \u003ctd class=\"td1\"\u003e05/27/2016 \u0026raquo;\r\n                        \u003cspan\u003eCBA BAD\u003c/span\u003e\u003c/td\u003e\r\n                      \u003ctd class=\"td2\"\u003e\r\n                      \r\n                        \u003ca class=\"DeleteButtonInList\" href=\"javascript:void(0)\" onclick=\"javascript:deletecomment(this, 22791);\" style=\"visibility:hidden;\"\u003e\u003c/a\u003e\r\n                      \r\n                      \u003c/td\u003e\r\n                    \u003c/tr\u003e\r\n                  \r\n                    \u003ctr\u003e\r\n                      \u003ctd class=\"td1\"\u003e05/27/2016 \u0026raquo;\r\n                        \u003cspan\u003eNOI - Acceleration Letter Sent \u003c/span\u003e\u003c/td\u003e\r\n                      \u003ctd class=\"td2\"\u003e\r\n                      \r\n                        \u003ca class=\"DeleteButtonInList\" href=\"javascript:void(0)\" onclick=\"javascript:deletecomment(this, 22793);\" style=\"visibility:hidden;\"\u003e\u003c/a\u003e\r\n                      \r\n                      \u003c/td\u003e\r\n                    \u003c/tr\u003e\r\n                  \r\n                    \u003ctr\u003e\r\n                      \u003ctd class=\"td1\"\u003e06/01/2016 \u0026raquo;\r\n                        \u003cspan\u003ePossible Number (510) 302-5831\u003c/span\u003e\u003c/td\u003e\r\n                      \u003ctd class=\"td2\"\u003e\r\n                      \r\n                        \u003ca class=\"DeleteButtonInList\" href=\"javascript:void(0)\" onclick=\"javascript:deletecomment(this, 23076);\" style=\"visibility:hidden;\"\u003e\u003c/a\u003e\r\n                      \r\n                      \u003c/td\u003e\r\n                    \u003c/tr\u003e\r\n                  \r\n                    \u003ctr\u003e\r\n                      \u003ctd class=\"td1\"\u003e06/03/2016 \u0026raquo;\r\n                        \u003cspan\u003eNOI - Acceleration Letter Expired\u003c/span\u003e\u003c/td\u003e\r\n                      \u003ctd class=\"td2\"\u003e\r\n                      \r\n                        \u003ca class=\"DeleteButtonInList\" href=\"javascript:void(0)\" onclick=\"javascript:deletecomment(this, 23303);\" style=\"visibility:hidden;\"\u003e\u003c/a\u003e\r\n                      \r\n                      \u003c/td\u003e\r\n                    \u003c/tr\u003e\r\n                  \r\n                    \u003ctr\u003e\r\n                      \u003ctd class=\"td1\"\u003e06/07/2016 \u0026raquo;\r\n                        \u003cspan\u003eScorecard Percentage =  80% PASS\u003c/span\u003e\u003c/td\u003e\r\n                      \u003ctd class=\"td2\"\u003e\r\n                      \r\n                        \u003ca class=\"DeleteButtonInList\" href=\"javascript:void(0)\" onclick=\"javascript:deletecomment(this, 23600);\" style=\"visibility:hidden;\"\u003e\u003c/a\u003e\r\n                      \r\n                      \u003c/td\u003e\r\n                    \u003c/tr\u003e\r\n                  \r\n                    \u003ctr\u003e\r\n                      \u003ctd class=\"td1\"\u003e06/08/2016 \u0026raquo;\r\n                        \u003cspan\u003eLEGAL REVIEW: APPROVED FOR A SMALL CLAIM. \u003c/span\u003e\u003c/td\u003e\r\n                      \u003ctd class=\"td2\"\u003e\r\n                      \r\n                        \u003ca class=\"DeleteButtonInList\" href=\"javascript:void(0)\" onclick=\"javascript:deletecomment(this, 23839);\" style=\"visibility:hidden;\"\u003e\u003c/a\u003e\r\n                      \r\n                      \u003c/td\u003e\r\n                    \u003c/tr\u003e\r\n                  \r\n              \u003c/table\u003e\r\n          \u003c/td\u003e\r\n        \u003c/tr\u003e\r\n      \u003c/table\u003e\r\n\r\n    \u003c/td\u003e\r\n    \u003cscript type=\"text/javascript\"\u003e\r\n      $(\u0027.gridtwocolumns tr\u0027).mouseover(function ()\r\n      {\r\n        $(this).find(\u0027\u003etd\u0027).css(\u0027background-color\u0027, \u0027#e3e3e3\u0027);\r\n        $(this).find(\u0027\u003etd.td2 a\u0027).css(\u0027visibility\u0027, \u0027visible\u0027);\r\n      });\r\n\r\n      $(\u0027.gridtwocolumns tr\u0027).mouseout(function ()\r\n      {\r\n        $(this).find(\u0027\u003etd\u0027).css(\u0027background-color\u0027, \u0027\u0027);\r\n        $(this).find(\u0027\u003etd.td2 a\u0027).css(\u0027visibility\u0027, \u0027hidden\u0027);\r\n      });\r\n    \u003c/script\u003e\r\n  \u003c/tr\u003e\r\n\u003c/table\u003e\r\n\r\n","PageId":"MainPropertiesView"}][0];
+          pageSections.refreshSection("mainpropertiesview", false, true);
 
-<table class="DataTable FixedHeader">
-  <thead>
-    <tr>
-      <td><a class='sortheader' onclick='sort(2);'>Name</a></td><td><a class='sortheader' onclick='sort(3);'>SSN</a></td><td>History</td>
+          $('img.pin').on('click', function(event) {
+            var $li = $(this).parents();
+            if ($li.data('iscommandbutton') == true)
+            {
+              event.stopPropagation();
+              $li.trigger('click');
+              return;
+            }
+
+            pageSections.togglePinnedSection($li.attr('id'), $li, event);
+          });
+        </script>
+
+      </td>
     </tr>
-  </thead>
-  <tbody>
-    
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=10145">Pamela Aalgaard</a></td><td>xxx-xx-6277</td><td><a href="../customers/CustomerHistory.aspx?customerid=10145" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=8806">Lorelei Abarquez</a></td><td>xxx-xx-1006</td><td><a href="../customers/CustomerHistory.aspx?customerid=8806" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=5473">Mackenzie Abdo</a></td><td>xxx-xx-8758</td><td><a href="../customers/CustomerHistory.aspx?customerid=5473" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=6460">Jason Abendroth</a></td><td>xxx-xx-4471</td><td><a href="../customers/CustomerHistory.aspx?customerid=6460" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=13039">Andre Abraham-Deyang</a></td><td>xxx-xx-9092</td><td><a href="../customers/CustomerHistory.aspx?customerid=13039" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=6579">John Abrahamson</a></td><td>xxx-xx-2208</td><td><a href="../customers/CustomerHistory.aspx?customerid=6579" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=4908">Loretta abrams</a></td><td>xxx-xx-1354</td><td><a href="../customers/CustomerHistory.aspx?customerid=4908" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=11598">Jeff Abramson Jr.</a></td><td>xxx-xx-7620</td><td><a href="../customers/CustomerHistory.aspx?customerid=11598" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=9528">Linda Abrego</a></td><td>xxx-xx-2540</td><td><a href="../customers/CustomerHistory.aspx?customerid=9528" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=8161">Thomas Abrego</a></td><td>xxx-xx-0837</td><td><a href="../customers/CustomerHistory.aspx?customerid=8161" style="">History</a></td>
-        </tr>
-      
-        <tr class='WatchRow'>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=2186">Noaf Abuwandi</a></td><td>xxx-xx-7302</td><td><a href="../customers/CustomerHistory.aspx?customerid=2186" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=2823">Maridelle Acero</a></td><td>xxx-xx-1301</td><td><a href="../customers/CustomerHistory.aspx?customerid=2823" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=10908">ANA ACEVEDO</a></td><td>xxx-xx-2771</td><td><a href="../customers/CustomerHistory.aspx?customerid=10908" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=8330">Brittany Acevedo</a></td><td>xxx-xx-6746</td><td><a href="../customers/CustomerHistory.aspx?customerid=8330" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=10464">GONZALO ACEVEDO</a></td><td>xxx-xx-0526</td><td><a href="../customers/CustomerHistory.aspx?customerid=10464" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=6065">Roger Acevedo</a></td><td>xxx-xx-5801</td><td><a href="../customers/CustomerHistory.aspx?customerid=6065" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=5157">Evans Achara Sr.</a></td><td>xxx-xx-1399</td><td><a href="../customers/CustomerHistory.aspx?customerid=5157" style="">History</a></td>
-        </tr>
-      
-        <tr class='WatchRow'>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=3977">Robert Acheatel</a></td><td>xxx-xx-3060</td><td><a href="../customers/CustomerHistory.aspx?customerid=3977" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=10802">Alexis Acosta</a></td><td>xxx-xx-8526</td><td><a href="../customers/CustomerHistory.aspx?customerid=10802" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=2888">Daisy Acosta</a></td><td>xxx-xx-4961</td><td><a href="../customers/CustomerHistory.aspx?customerid=2888" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=3493">GWENDOLYN ACOSTA</a></td><td>xxx-xx-8088</td><td><a href="../customers/CustomerHistory.aspx?customerid=3493" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=11628">JOHN ACOSTA</a></td><td>xxx-xx-6942</td><td><a href="../customers/CustomerHistory.aspx?customerid=11628" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=9116">Kathleen Acosta</a></td><td>xxx-xx-7063</td><td><a href="../customers/CustomerHistory.aspx?customerid=9116" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=6619">Marlyn acosta</a></td><td>xxx-xx-0602</td><td><a href="../customers/CustomerHistory.aspx?customerid=6619" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=11530">RUBY ACOSTA</a></td><td>xxx-xx-3293</td><td><a href="../customers/CustomerHistory.aspx?customerid=11530" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=4113">Tony Adabale</a></td><td>xxx-xx-2610</td><td><a href="../customers/CustomerHistory.aspx?customerid=4113" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=8533">Vidal Adam</a></td><td>xxx-xx-8227</td><td><a href="../customers/CustomerHistory.aspx?customerid=8533" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=3999">Abdel Adam-Mahamat</a></td><td>xxx-xx-6680</td><td><a href="../customers/CustomerHistory.aspx?customerid=3999" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=7854">Carl Adams</a></td><td>xxx-xx-7271</td><td><a href="../customers/CustomerHistory.aspx?customerid=7854" style="">History</a></td>
-        </tr>
-      
-        <tr>
-          <td><a href="../customers/CustomerDetails.aspx?customerid=5408">Devon Adams</a></td><td>xxx-xx-8457</td><td><a href="../customers/CustomerHistory.aspx?customerid=5408" style="">History</a></td>
-        </tr>
-      
-  </tbody>
-</table>
-
-<div id="maincontent_Div_Pager" class="Pager HideWhenPrinting">
-  <a id="maincontent_PagerLastLinkButton" class="PagerLastButton" href="javascript:__doPostBack(&#39;ctl00$maincontent$PagerLastLinkButton&#39;,&#39;&#39;)"></a>
-  <a id="maincontent_PagerNextLinkButton" class="PagerNextButton" href="javascript:__doPostBack(&#39;ctl00$maincontent$PagerNextLinkButton&#39;,&#39;&#39;)"></a>
-  <a id="maincontent_PagerPreviousLinkButton" class="aspNetDisabled PagerPreviousButton"></a>
-  <a id="maincontent_PagerFirstLinkButton" class="aspNetDisabled PagerFirstButton"></a>
-  <span class="pagerMessage">Page 1 of 240</span>
-</div>
-
-<div style="clear: both;"></div>
-
-
-
-
-
+  </table>
+  
 <script language="javascript">skm_registerMenu('TopMenu',new skm_styleInfo('#AFD1FF','','','','','','','','',''),new skm_styleInfo('','','','','White','','','','',''),2,true);</script><script language="javascript">preloadimages('/plm.net/images/dashboard.png');</script></form>
-
+  <form name="CancelForm" action="Cancel.ashx" method="post">
+    <input type="hidden" name="autoextensionid" value="0" />
+    <input type="hidden" name="scheduledpaymentid" value="0" />
+    <input type="hidden" name="returnpage" value="customerdetails" />
+  </form>
 
     
         </td>
