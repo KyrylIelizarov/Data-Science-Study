@@ -1,6 +1,6 @@
 import requests
-import sys
 from lxml import html
+
 
 def login_lms(username, password):
     session_requests = requests.session()
@@ -22,9 +22,9 @@ def login_lms(username, password):
         "ctl00$maincontent$Password": password,
         "ctl00$maincontent$Username": username
     }
-    result = session_requests.post(
+    session_requests.post(
         login_url,
-        data = payload
+        data=payload
     )
 
     result = session_requests.get(login_type_url)
@@ -46,17 +46,8 @@ def login_lms(username, password):
         "ctl00$maincontent$RegionsList": "",
         "ctl00$maincontent$StoresList": ""
     }
-    result = session_requests.post(
+    session_requests.post(
         login_type_url,
         data=payload
     )
-
-
-    print(result.text)
-
-# Do not modify below this line
-# =============================
-if __name__ == '__main__':
-    username = sys.argv[1]
-    password = sys.argv[2]
-    login_lms(username, password)
+    return session_requests
