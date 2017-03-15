@@ -1,45 +1,45 @@
 import login_to_lms
+import get_cust_id
+import get_cust_data
+
 from lxml import html
+
 import sys
 import requests
 # Import pandas
 import pandas as pd
 
-# Log In to Shoreside LMS
-session_requests = login_to_lms.login_lms("jack", "paf52")
+def main_func(username, password):
+    # Log In to Shoreside LMS
+    session_requests = login_to_lms.login_lms(username, password)
 
-# Load .xslx with names
-file = 'Shoreside_LMS_loans.xlsx'
-xl = pd.ExcelFile(file)
-input_names = xl.parse('input')
+    # Load .xslx with names
+    xlsx_file = 'Shoreside_LMS_loans.xlsx'
+    xl = pd.ExcelFile(xlsx_file)
+    input_names = xl.parse('input')
+    output_names = input_names
 
-search_url = "https://apply.shoresideloans.com/plm.net/customers/SearchCustomers.ashx?term="
-cust_url = "https://apply.shoresideloans.com/plm.net/customers/CustomerDetails.aspx?customerid="
+    for lab, row in input_names.iterrows():
+        if lab < 5:
+        #if Shonta Jones2897
+            # Get and prepare Name
+            cust_name = row['Judgment Creditor']
+            cust_name = cust_name.rstrip(' ')
 
-#Luis Salcedo
-#Billie Evans
+            custid_url = get_cust_id.get_custid_url(session_requests, cust_name)
 
-for lab, row in input_names.iterrows():
-    if lab < 1:
-        # Get and prepare Name
-        cust_name = row['Judgment Creditor']
-        cust_name = cust_name.rstrip(' ')
-        cust_search_url = search_url + cust_name.replace(' ', '+')
+            if len(custid_url) > 0:
+                result = session_requests.get(custid_url)
+                tree = html.fromstring(result.text)
+                javascript_content = tree.xpath('//script[@type = "text/javascript"]/text()')
 
+                for str in javascript_content:
+                    output_names.loc[lab, 'SSN'] = get_cust_data.get_cust_ssn(str)
+                    output_names.loc[lab, 'Loan #'] = get_cust_data.get_cust_loannum(str)
+                    output_names.loc[lab, 'Loan Status'] = get_cust_data.get_cust_loanstatus(str)
+            print ("{0} SSN:{1} Loan#: {2} Loan Status: {3}".format(output_names.loc[lab, 'Judgment Creditor'], output_names.loc[lab, 'SSN'], output_names.loc[lab, 'Loan #'], output_names.loc[lab, 'Loan Status']))
 
-        result = session_requests.get(cust_search_url)
-        custid_url = ''
-        # Check if result is not empty
-        if len(result.json()) > 0:
-            result_json = result.json()[0]
-            custid_url = cust_url + str(result_json[u'value'])
-            #print custid_url
-        else:
-            print "Nothing found"
-
-        if len(custid_url) > 0:
-            result = session_requests.get(custid_url)
-            print result.text.encode('ascii', 'ignore')
-            '''tree = html.fromstring(result.text)
-            smth = tree.xpath('//table[@class = "ProfileProperties"]'/)[0]
-            print smth'''
+if __name__ == '__main__':
+    username = sys.argv[1]
+    password = sys.argv[2]
+    main_func(username, password)
