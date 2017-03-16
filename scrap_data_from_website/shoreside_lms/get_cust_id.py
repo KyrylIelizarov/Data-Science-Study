@@ -10,6 +10,7 @@ def get_custid_url(session_requests, cust_name):
 
     search_url = "https://apply.shoresideloans.com/plm.net/customers/SearchCustomers.ashx?term="
     cust_url = "https://apply.shoresideloans.com/plm.net/customers/CustomerDetails.aspx?customerid="
+    cust_getall_url = "https://apply.shoresideloans.com/plm.net/customers/CustomerDetails.aspx/GetPageAjaxContent?customerid="
 
     cust_search_url = search_url + cust_name.replace(' ', '+')
 
@@ -20,6 +21,7 @@ def get_custid_url(session_requests, cust_name):
     if len(result.json()) > 0:
         result_json = result.json()[0]
         custid_url = "{0}{1}".format(cust_url, result_json[u'value'])
+        custid_getall_url = "{0}{1}".format(cust_getall_url, result_json[u'value'])
     else:
         cust_name_parts = cust_name.split(' ')
         for name_part in cust_name_parts:
@@ -35,4 +37,4 @@ def get_custid_url(session_requests, cust_name):
                     print '{0} vs {1}. similarity: {2}'.format(doc1,doc2,doc1.similarity(doc2))
                     '''
 
-    return custid_url
+    return custid_url, custid_getall_url
