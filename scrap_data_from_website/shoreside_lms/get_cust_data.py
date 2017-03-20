@@ -46,52 +46,77 @@ def get_cust_loanstatus(text_to_parse):
 def get_cust_address(text_to_parse):
 
     #Address search reg exp
+
     reg_expression = '\\\\u003eAddress :\\\\u003c/td\\\\u003e\\\\r\\\\n      \\\\u003ctd\\\\u003e[\w\p\d.,-:;/ ]*\\\\u003c/td\\\\u003e\\\\r\\\\n'
 
     address = ''
-    step1 = re.search(reg_expression, str)
-    if step1 != None:
-        #print "---{0}---".format(step1.group())
-        step2 = re.search('\\\\u003ctd\\\\u003e[\w\p\d.,-:;/ ]*\\\\u003c', step1.group())
-        #print "---{0}---".format(step2.group())
-        address = step2.group()[14:-6]
+    index_start = text_to_parse.find("\\\\u003eAddress :")
+    index_end = text_to_parse.find("\\u003eRent or Own :")
+    step1 = text_to_parse[index_start + 61: index_end]
+    address = step1[0:step1.find("\\")]
 
     return address
 
 def get_cust_city(text_to_parse):
 
     #City search reg exp
-    reg_expression = '\\\\u003eCity :\\\\u003c/td\\\\u003e\\\\r\\\\n      \\\\u003ctd\\\\u003e[\w\p\d.,-:;/ ]*\\\\u003c/td\\\\u003e\\\\r\\\\n'
-    step1 = re.search(reg_expression, str)
-    city = ''
-    if step1 != None:
-        #print "---{0}---".format(step1.group())
-        step2 = re.search('\\\\u003ctd\\\\u003e[\w\p\d.,-:;/ ]*\\\\u003c', step1.group())
-        #print "---{0}---".format(step2.group())
-        city = step2.group()[14:-6]
-        #print city
+    reg_expression = '\\\\u003eCity :\\\\u003c/td\\\\u003e\\\\r\\\\n[\s ]*\\\\u003ctd\\\\u003e[\w\p\d.,-:;/ ]*\\\\u003c/td\\\\u003e\\\\r\\\\n'
 
+    city = ''
+    index_start = text_to_parse.find("\\\\u003eCity :")
+    index_end = text_to_parse.find("\\\\u003eState, Zip :")
+    step1 = text_to_parse[index_start + 58: index_end]
+    city = step1[0:step1.find("\\")]
     return city
 
 def get_cust_statezip(text_to_parse):
 
     #State, Zip search reg exp
-    reg_expression = '\\\\u003ctd\\\\u003eState, Zip :\\\\u003c/td\\\\u003e\\\\r\\\\n      \\\\u003ctd\\\\u003e\\\\r\\\\n[\w ]*\\\\r\\\\n[\d -]*\\\\r\\\\n'
+    reg_expression = '\\\\u003ctd\\\\u003eState, Zip :\\\\u003c / td\\\\u003e\\\\r\\\\n[ ]*\\\\u003ctd\\\\u003e\\\\r\\\\n[\w ]*\\\\r\\\\n[\d -]*\\\\r\\\\n'
 
     state = ''
     zip = ''
-    step1 = re.search(reg_expression, str)
-    if step1 != None:
-        #print "---{0}---".format(step1.group())
-        step2_1 = re.search('\\\\u003ctd\\\\u003e\\\\r\\\\n[\w ]*\\\\r\\\\n', step1.group())
-        step2_2 = re.search('\\\\r\\\\n[\d -]*\\\\r\\\\n', step1.group())
-        #print "---{0}---".format(step2_1.group())
-        #print "---{0}---".format(step2_2.group())
-        step3_1 = re.search('[A-Z]{2}', step2_1.group())
-        step3_2 = re.search('[0-9]{5}|[0-9]{5}-[0-9]{4}', step2_2.group())
-        #print "---{0}---".format(step3_1.group())
-        #print "---{0}---".format(step3_2.group())
-        state = step3_1.group()
-        zip = step3_2.group()
+    index_start = text_to_parse.find("\\\\u003eState, Zip :")
+    index_end = text_to_parse.find("\\\\u003eMail Address :")
+    step1 = text_to_parse[index_start + 70: index_end]
+    state = re.search('[A-Z]{2}',step1[0:step1.find("\\\\r\\\\n")]).group()
+    step2 = step1[step1.find("\\\\r\\\\n")+6:step1.find("\\\\u003c")]
+    zip = re.search('[0-9]{5}|[0-9]{5}-[0-9]{4}',step2[0:step2.find("\\\\r\\\\n")]).group()
 
-    return state, zip
+    return  state, zip
+
+def get_cust_bankname(text_to_parse):
+    # Bank Name search reg exp
+
+    index_start = text_to_parse.find("\\\\u003eBank Name :")
+    index_end = text_to_parse.find("\\\\u003eBank Phone :")
+    step1 = text_to_parse[index_start + 90: index_end]
+    bank_name = step1[0:step1.find("\\")]
+
+    return bank_name
+
+
+def get_cust_aba(text_to_parse):
+    # Bank Name search reg exp
+
+    index_start = text_to_parse.find("\\\\u003eABA Number :")
+    index_end = text_to_parse.find("\\\\u003eAccount Length :")
+    step1 = text_to_parse[index_start + 91: index_end]
+    bank_aba = step1[0:step1.find("\\")]
+
+    return bank_aba
+
+def get_cust_accountnumber(text_to_parse):
+    # Bank Name search reg exp
+    account_number=''
+    index_start = text_to_parse.find("\\\\u003eAccount Number :")
+    index_end = text_to_parse.find('\\\\"ctl00_BankInfoRepeater_ctl00_0_Bank_AccountNumberManualAchLink_0')
+    step1 = text_to_parse[index_start + 100: index_end]
+    step2 = step1[0:step1.find("\\")]
+    m = re.search('[0-9]+',step2)
+    if m != None:
+        account_number = m.group()
+    else:
+        account_number = step2
+
+    return account_number

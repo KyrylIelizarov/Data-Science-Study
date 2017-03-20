@@ -16,6 +16,7 @@ def get_custid_url(session_requests, cust_name):
 
     result = session_requests.get(cust_search_url)
     custid_url = ''
+    custid_getall_url = ''
 
     # Check if result is not empty
     if len(result.json()) > 0:
